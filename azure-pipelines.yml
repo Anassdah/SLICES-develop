@@ -31,6 +31,7 @@ stages:
       inputs:
         dockerVersion: '17.09.0-ce'
     - script:
-        docker build -t blueprint ./sopnode/ansible/Dockerfile
+        #docker build -t blueprint ./sopnode/ansible/Dockerfile
+        docker version
       displayName: Build an image
       
