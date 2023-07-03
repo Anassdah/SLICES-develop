@@ -1,4 +1,4 @@
-# Docker
+
 
 # Build a Docker image
 # https://docs.microsoft.com/azure/devops/pipelines/languages/docker
@@ -27,11 +27,16 @@ stages:
       name: Default
 
     steps:
+
     - task: DockerInstaller@0
       inputs:
         dockerVersion: '17.09.0-ce'
-    - script:
-        #docker build -t blueprint ./sopnode/ansible/Dockerfile
-        docker version
-      displayName: Build an image
-      
+      displayName: Install docker
+        # Docker
+    - task: Docker@2
+      inputs:
+        repository: 'docker.io/anassdahchour /blueprintest'
+        command: 'buildAndPush'
+        Dockerfile: 'Dockerfile'
+        buildContext: 'sopnode/ansible/'  
+      displayName: build image
