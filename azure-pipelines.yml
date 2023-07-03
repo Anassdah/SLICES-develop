@@ -29,7 +29,7 @@ stages:
     steps:
     - task: DockerInstaller@0
       inputs:
-        dockerVersion: 'latest'
+        dockerVersion: '17.09.0-ce'
     - script:
         docker build -t blueprint ./sopnode/ansible/Dockerfile
       displayName: Build an image
