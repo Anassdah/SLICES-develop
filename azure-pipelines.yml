@@ -37,6 +37,5 @@ stages:
       inputs:
         repository: 'docker.io/anassdahchour /blueprintest'
         command: 'buildAndPush'
-        Dockerfile: 'Dockerfile'
-        buildContext: './sopnode/ansible/'  
+        Dockerfile: './sopnode/ansible/Dockerfile'
       displayName: build image
