@@ -26,6 +26,6 @@ stages:
     steps:
     - script:
         #sudo docker build -t blueprint ./sopnode/ansible/Dockerfile
-        service docker status
+        service docker start
       displayName: Build an image
       
