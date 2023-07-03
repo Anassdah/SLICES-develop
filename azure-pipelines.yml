@@ -24,12 +24,6 @@ stages:
     pool:
       name: Default
     steps:
-    - script: /etc/init.d/docker start
-    - task: Docker@2
+    - script: build -t blueprint ./sopnode/ansible/Dockerfile
       displayName: Build an image
-      inputs:
       
-        command: build
-        dockerfile: './sopnode/ansible/Dockerfile'
-        tags: |
-          $(tag)
