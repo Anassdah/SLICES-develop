@@ -1,7 +1,5 @@
 # Docker
-- task: DockerInstaller@0
-  inputs:
-    dockerVersion: 'latest'
+
 # Build a Docker image
 # https://docs.microsoft.com/azure/devops/pipelines/languages/docker
 
@@ -18,6 +16,7 @@ resources:
 variables:
   tag: '$(Build.BuildId)'
 
+
 stages:
 - stage: Build
   displayName: Build image
@@ -26,7 +25,11 @@ stages:
     displayName: Build
     pool:
       name: Default
+
     steps:
+    - task: DockerInstaller@0
+      inputs:
+        dockerVersion: 'latest'
     - script:
         docker build -t blueprint ./sopnode/ansible/Dockerfile
       displayName: Build an image
