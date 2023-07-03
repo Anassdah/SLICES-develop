@@ -5,6 +5,10 @@
 trigger:
 - develop
 
+pool:
+ name: Default
+ #name: Azure Pipelines
+ 
 resources:
 - repo: self
 
