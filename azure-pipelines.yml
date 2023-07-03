@@ -24,6 +24,8 @@ stages:
     pool:
       name: Default
     steps:
-    - script: sudo docker build -t blueprint ./sopnode/ansible/Dockerfile
+    - script:
+        #sudo docker build -t blueprint ./sopnode/ansible/Dockerfile
+        sudo service docker status
       displayName: Build an image
       
