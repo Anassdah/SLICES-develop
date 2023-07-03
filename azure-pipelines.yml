@@ -13,8 +13,6 @@ pool:
 resources:
 - repo: self
 
-variables:
-  tag: '$(Build.BuildId)'
 
 
 stages:
@@ -35,7 +33,6 @@ stages:
         # Docker
     - task: Docker@2
       inputs:
-        repository: 'docker.io/anassdahchour /blueprintest'
         command: 'buildAndPush'
         Dockerfile: './sopnode/ansible/Dockerfile'
       displayName: build image
