@@ -50,7 +50,8 @@ stages:
       displayName: Install dependencies
     - script: |
               python3 -m pip -V
-              ls /usr/local/bin/ansible
+              echo $PATH
+
               #ansible --version
               #ansible-playbook  -i inventories/blueprint/ k8s-master.yaml --extra-vars "@params.blueprint.yaml"
       displayName: Ansible
