@@ -4,7 +4,7 @@
 # https://docs.microsoft.com/azure/devops/pipelines/languages/docker
 
 trigger:
-- main
+- develop
 
 pool:
  name: Default
@@ -50,5 +50,6 @@ stages:
               git checkout tags/2nd-summer-school
               cd sopnode/ansible
               #docker run -it -v "$(pwd)":/blueprint -v ${HOME}/.ssh/id_rsa_blueprint:/id_rsa_blueprint blueprint
-              ls
+              ansible-playbook  -i inventories/blueprint/ k8s-master.yaml --extra-vars "@params.blueprint.yaml"
+
       displayName: Install dependencies
