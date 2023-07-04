@@ -37,5 +37,4 @@ stages:
         repository: 'anassdahchour/bluprintest'
         command: 'buildAndPush'
         Dockerfile: 'sopnode/ansible/Dockerfile'
-        buildContext: 
         tags: 'blueprint'
