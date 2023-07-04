@@ -40,7 +40,8 @@ stages:
     - script: | 
               whoami  
               apt update && apt install -y python3-pip git
-              python3 -m pip install --user ansible-core==2.13.2
+              python3 -m pip install --user ansible-core==2.12.3
+              #python3 -m pip install --user ansible-core==2.13.2
               # echo "export PATH=$PATH:~/.local/bin" >> ~/.bashrc
               # ~/.local/bin/ansible-galaxy install -r /reqs/ansible-galaxy.yml
               # pip3 install -r /reqs/python3.txt
