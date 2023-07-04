@@ -1,13 +1,11 @@
 all:
   children:
     computes:
-      hosts:
-        172.16.2.6:
-          xx-name: rightclient
+      localhost:
+        ansible_connection: local
     masters:
-      hosts:
-        172.16.2.5:
-          xx-name: leftclient
+      localhost:
+        ansible_connection: local
     openvpn:
       hosts:
         172.16.2.5:
