@@ -42,14 +42,11 @@ stages:
               apt update && apt install -y python3-pip git
               python3 -m pip install --user ansible-core==2.13.2
               echo "export PATH=$PATH:~/.local/bin" >> ~/.bashrc
-              mkdir /reqs/
-              cp collections/requirements.yml /reqs/ansible-galaxy.yml
-              cp requirements.txt /reqs/python3.txt
               ~/.local/bin/ansible-galaxy install -r /reqs/ansible-galaxy.yml
               pip3 install -r /reqs/python3.txt
               git checkout tags/2nd-summer-school
               cd sopnode/ansible
-              #docker run -it -v "$(pwd)":/blueprint -v ${HOME}/.ssh/id_rsa_blueprint:/id_rsa_blueprint blueprint
-              ansible-playbook  -i inventories/blueprint/ k8s-master.yaml --extra-vars "@params.blueprint.yaml"
-
       displayName: Install dependencies
+    - script: |
+              ansible-playbook  -i inventories/blueprint/ k8s-master.yaml --extra-vars "@params.blueprint.yaml"
+      displayName: Ansible
