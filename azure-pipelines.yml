@@ -42,5 +42,4 @@ stages:
               git checkout tags/2nd-summer-school -b test
               cd SLICES/sopnode/ansible
               docker run -it -v "$(pwd)":/blueprint -v ${HOME}/.ssh/id_rsa_blueprint:/id_rsa_blueprint blueprint
-              ls ${HOME}/.ssh/
 
