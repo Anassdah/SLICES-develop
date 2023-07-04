@@ -2,9 +2,7 @@ all:
   children:
     computes:
       hosts:
-        172.16.2.2:
-          xx-name: leftswitch
+        localhost ansible_connection=local
     masters:
       hosts:
-        172.16.2.2:
-          xx-name: leftswitch
+       localhost ansible_connection=local
