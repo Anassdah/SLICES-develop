@@ -40,6 +40,6 @@ stages:
     - script: | 
               git checkout tags/2nd-summer-school
               cd sopnode/ansible
-              docker run -it -v "$(pwd)":/blueprint -v ${HOME}/.ssh/id_rsa_blueprint:/id_rsa_blueprint blueprint
-              pwd
+              #docker run -it -v "$(pwd)":/blueprint -v ${HOME}/.ssh/id_rsa_blueprint:/id_rsa_blueprint blueprint
+              ls
       displayName: Set 
