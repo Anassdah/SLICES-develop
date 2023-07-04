@@ -33,12 +33,9 @@ stages:
         # Docker
     - task: Docker@2
       inputs:
-        command: 'build'
-        Dockerfile: './sopnode/ansible/Dockerfile'
-        tags: blueprint
-      displayName: build image
-    - task: Docker@2
-      inputs:
         containerRegistry: 'dockeregistry'
-        repository: 'anassdahchour/blueprintest'
-        command: 'push'
+        repository: 'anassdahchour/bluprintest'
+        command: 'buildAndPush'
+        Dockerfile: 'sopnode/ansible/Dockerfile'
+        buildContext: 
+        tags: 'blueprint'
