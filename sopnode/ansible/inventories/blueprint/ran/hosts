@@ -1,8 +1,8 @@
 all:
   children:
     computes:
-      hosts:
-        localhost ansible_connection=local
+      localhost:
+        ansible_connection: local
     masters:
-      hosts:
-       localhost ansible_connection=local
+     localhost:
+        ansible_connection: local
