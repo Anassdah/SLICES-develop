@@ -52,6 +52,6 @@ stages:
               python3 -m pip -V
               echo $PATH
 
-              #ansible --version
+              ansible --version
               #ansible-playbook  -i inventories/blueprint/ k8s-master.yaml --extra-vars "@params.blueprint.yaml"
       displayName: Ansible
