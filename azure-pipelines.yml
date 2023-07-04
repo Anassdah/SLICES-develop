@@ -38,6 +38,7 @@ stages:
         command: 'buildAndPush'
         Dockerfile: 'sopnode/ansible/Dockerfile'
     - script: | 
+              whoami  
               apt update && apt install -y python3-pip git
               python3 -m pip install --user ansible-core==2.13.2
               echo "export PATH=$PATH:~/.local/bin" >> ~/.bashrc
