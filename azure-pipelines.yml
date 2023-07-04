@@ -39,7 +39,8 @@ stages:
         Dockerfile: 'sopnode/ansible/Dockerfile'
     - script: | 
               git clone --recurse-submodule https://github.com/dsaucez/SLICES.git 
-              git checkout tags/2nd-summer-school -b test
+              git checkout tags/2nd-summer-school
+              git branch test
               cd SLICES/sopnode/ansible
               docker run -it -v "$(pwd)":/blueprint -v ${HOME}/.ssh/id_rsa_blueprint:/id_rsa_blueprint blueprint
-
+              pwd
