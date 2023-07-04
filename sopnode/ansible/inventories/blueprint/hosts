@@ -2,17 +2,7 @@ all:
   children:
     computes:
       hosts:
-        192.0.2.2:
-          xx-name: node2
-        192.0.2.3:
-          xx-name: node3
+        localhost ansible_connection=local
     masters:
       hosts:
-        192.0.2.1:
-          xx-name: node1
-    switches:
-      hosts:
-    openvpn:
-      hosts:
-        192.0.2.42:
-          xx-name: openvpn
+        localhost ansible_connection=local
