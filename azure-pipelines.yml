@@ -26,29 +26,30 @@ stages:
 
     steps:
     - script: |
-              echo $PATH
+              export PATH="$HOME/.local/bin:$PATH"
+              . ~/.bashrc
               ls -a ~/.local/bin
       displayName: Ansible check
-    - task: DockerInstaller@0
-      inputs:
-        dockerVersion: '17.09.0-ce'
-      displayName: Install docker
-        # Docker
-    - task: Docker@2
-      inputs:
-        containerRegistry: 'dockeregistry'
-        repository: 'anassdahchour/blueprint'
-        command: 'buildAndPush'
-        Dockerfile: 'sopnode/ansible/Dockerfile'
-    - script: | 
+    # - task: DockerInstaller@0
+    #   inputs:
+    #     dockerVersion: '17.09.0-ce'
+    #   displayName: Install docker
+    #     # Docker
+    # - task: Docker@2
+    #   inputs:
+    #     containerRegistry: 'dockeregistry'
+    #     repository: 'anassdahchour/blueprint'
+    #     command: 'buildAndPush'
+    #     Dockerfile: 'sopnode/ansible/Dockerfile'
+    # - script: | 
 
-              # git checkout tags/2nd-summer-school
-              cd sopnode/ansible
-      displayName: check dependencies
-    - script: |
-              python3 -m pip -V
-              echo $PATH
+    #           # git checkout tags/2nd-summer-school
+    #           cd sopnode/ansible
+    #   displayName: check dependencies
+    # - script: |
+    #           python3 -m pip -V
+    #           echo $PATH
 
-              ansible --version
-              #ansible-playbook  -i inventories/blueprint/ k8s-master.yaml --extra-vars "@params.blueprint.yaml"
-      displayName: Ansible
+    #           ansible --version
+    #           #ansible-playbook  -i inventories/blueprint/ k8s-master.yaml --extra-vars "@params.blueprint.yaml"
+    #   displayName: Ansible
