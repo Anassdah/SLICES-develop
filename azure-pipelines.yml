@@ -25,7 +25,11 @@ stages:
       name: Default
 
     steps:
-
+    - script: |
+              python3 -m pip install --user ansible-core==2.13.2
+              echo "export PATH=$PATH:~/.local/bin" >> ~/.bashrc
+              exec bash && . ~/.bashrc && ansible --version
+      displayName: Ansible check
     - task: DockerInstaller@0
       inputs:
         dockerVersion: '17.09.0-ce'
@@ -38,12 +42,7 @@ stages:
         command: 'buildAndPush'
         Dockerfile: 'sopnode/ansible/Dockerfile'
     - script: | 
-              # whoami  
-              # apt update && apt install -y python3-pip git
-              # python3 -m pip install --user ansible-core==2.13.2
-              # echo "export PATH=$PATH:/azp/_work/_tool" >> ~/.bashrc
-              # /azp/_work/_tool/ansible-galaxy install -r /reqs/ansible-galaxy.yml
-              # pip3 install -r /reqs/python3.txt
+
               # git checkout tags/2nd-summer-school
               cd sopnode/ansible
       displayName: check dependencies
