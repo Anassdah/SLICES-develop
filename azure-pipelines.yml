@@ -26,7 +26,6 @@ stages:
 
     steps:
     - script: |
-              python3 -m pip install --user ansible-core==2.13.2
               echo "export PATH=$PATH:~/.local/bin" >> ~/.bashrc
               exec bash && . ~/.bashrc && ansible --version
       displayName: Ansible check
