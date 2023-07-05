@@ -46,7 +46,7 @@ stages:
               # pip3 install -r /reqs/python3.txt
               # git checkout tags/2nd-summer-school
               cd sopnode/ansible
-      displayName: check dependencies dependencies
+      displayName: check dependencies
     - script: |
               python3 -m pip -V
               echo $PATH
