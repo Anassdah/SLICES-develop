@@ -26,8 +26,7 @@ stages:
 
     steps:
     - script: |
-              echo "export PATH=$PATH:~/.local/bin" >> ~/.bashrc
-              exec bash && . ~/.bashrc && ansible --version
+              . ~/.bashrc && ansible --version
       displayName: Ansible check
     - task: DockerInstaller@0
       inputs:
