@@ -29,6 +29,7 @@ stages:
               export PATH="$HOME/.local/bin:$PATH"
               . ~/.bashrc
               ansible --version
+              ansible-galaxy collection install community.general
               cd sopnode/ansible
               ansible-playbook  -i inventories/blueprint/ k8s-master.yaml --extra-vars "@params.blueprint.yaml"
       displayName: Ansible check
