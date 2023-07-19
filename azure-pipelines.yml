@@ -29,6 +29,8 @@ stages:
               export PATH="$HOME/.local/bin:$PATH"
               . ~/.bashrc
               ansible --version
+              cd sopnode/ansible
+              ansible-playbook  -i inventories/blueprint/ k8s-master.yaml --extra-vars "@params.blueprint.yaml"
       displayName: Ansible check
     # - task: DockerInstaller@0
     #   inputs:
