@@ -28,6 +28,7 @@ stages:
     - script: |
               export PATH="$HOME/.local/bin:$PATH"
               . ~/.bashrc
+              git checkout tags/2nd-summer-school
               cd sopnode/ansible
               ansible-playbook  -i inventories/blueprint/ k8s-master.yaml --extra-vars "@params.blueprint.core.yaml"
       displayName: Ansible playbooks
