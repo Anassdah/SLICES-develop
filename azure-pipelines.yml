@@ -14,7 +14,7 @@ resources:
 - repo: self
 
 variables:
-  setup_script: &setup_script |
+  setup_script: setup_script |
     export PATH="$HOME/.local/bin:$PATH"
     . ~/.bashrc
     git checkout tags/2nd-summer-school
@@ -32,7 +32,7 @@ stages:
       name: Default
 
     steps:
-    - script: *setup_script  # Reference the setup_script anchor
+    - script: setup_script  # Reference the setup_script anchor
       displayName: Setup Environment
     # - script: |
     #           export PATH="$HOME/.local/bin:$PATH"
