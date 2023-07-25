@@ -13,6 +13,13 @@ pool:
 resources:
 - repo: self
 
+variables:
+  setup_script: &setup_script |
+    export PATH="$HOME/.local/bin:$PATH"
+    . ~/.bashrc
+    git checkout tags/2nd-summer-school
+    cd sopnode/ansible
+
 
 
 stages:
@@ -25,29 +32,27 @@ stages:
       name: Default
 
     steps:
-    - script: |
-              export PATH="$HOME/.local/bin:$PATH"
-              . ~/.bashrc
-              git checkout tags/2nd-summer-school
-              cd sopnode/ansible
-      displayName: Adding ansible to path
-      name: setup_environment
+    - script: *setup_script  # Reference the setup_script anchor
+      displayName: Setup Environment
+    # - script: |
+    #           export PATH="$HOME/.local/bin:$PATH"
+    #           . ~/.bashrc
+    #           git checkout tags/2nd-summer-school
+    #           cd sopnode/ansible
+    #   displayName: Adding ansible to path
+    #   name: setup_environment
     - script: |
               sed -i 's/172\.16\.2\.2/10\.92\.171\.134/g' inventories/blueprint/ran/hosts
               sed -i 's/root/ubuntu/g' inventories/blueprint/ran/group_vars/all
               sed -i 's/172\.16\.2\.27/10\.92\.171\.134/g; s/172\.16\.0\.0\/12/10\.92\.171\.0\/24/g' params.blueprint.ran.yaml 
               ansible-playbook  -i inventories/blueprint/ran/ k8s-master.yaml --extra-vars "@params.blueprint.ran.yaml"
       displayName: Creating RAN cluster
-      env:
-        PATH: $(setup_environment.PATH)
     - script: |
               #core
               sed -i 's/root/ubuntu/g' inventories/blueprint/core/group_vars/all
               sed -i 's/172\.16\.2\.26/10\.92\.171\.140/g; s/172\.16\.0\.0\/12/10\.92\.171\.0\/24/g' params.blueprint.core.yaml
               sed -i 's/172\.16\.2\.5/10\.92\.171\.140/g; s/172\.16\.2\.6/10\.92\.171\.229/g' inventories/blueprint/core/hosts
       displayName: Creating Core cluster
-      env:
-        PATH: $(setup_environment.PATH)
     # - task: DockerInstaller@0
     #   inputs:
     #     dockerVersion: '17.09.0-ce'
