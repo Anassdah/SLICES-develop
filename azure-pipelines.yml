@@ -30,7 +30,7 @@ stages:
       inputs:
         sshEndpoint: 'ssh-sop'
         runOptions: 'commands'
-        commands: 'ssh -A interns@sopnode-z1.inria.fr "touch test"'
+        commands: 'ssh -A interns@sopnode-z1.inria.fr "multipass launch --name test"'
         readyTimeout: '20000'
     - script: |
 
@@ -39,21 +39,21 @@ stages:
         . ~/.bashrc
         git checkout tags/2nd-summer-school
         cd sopnode/ansible
-        # Creating RAN cluster
-        sed -i 's/172\.16\.2\.2/10\.92\.171\.134/g' inventories/blueprint/ran/hosts
-        sed -i 's/root/ubuntu/g' inventories/blueprint/ran/group_vars/all
-        sed -i 's/172\.16\.2\.27/10\.92\.171\.134/g; s/172\.16\.0\.0\/12/10\.92\.171\.0\/24/g' params.blueprint.ran.yaml 
-        ansible-playbook -i inventories/blueprint/ran/ k8s-master.yaml --extra-vars "@params.blueprint.ran.yaml"
-        ansible-playbook -i inventories/blueprint/ran/ k8s-node.yaml --extra-vars "@params.blueprint.ran.yaml"
+      #   # Creating RAN cluster
+      #   sed -i 's/172\.16\.2\.2/10\.92\.171\.134/g' inventories/blueprint/ran/hosts
+      #   sed -i 's/root/ubuntu/g' inventories/blueprint/ran/group_vars/all
+      #   sed -i 's/172\.16\.2\.27/10\.92\.171\.134/g; s/172\.16\.0\.0\/12/10\.92\.171\.0\/24/g' params.blueprint.ran.yaml 
+      #   ansible-playbook -i inventories/blueprint/ran/ k8s-master.yaml --extra-vars "@params.blueprint.ran.yaml"
+      #   ansible-playbook -i inventories/blueprint/ran/ k8s-node.yaml --extra-vars "@params.blueprint.ran.yaml"
 
 
-        # Creating Core cluster
-        sed -i 's/root/ubuntu/g' inventories/blueprint/core/group_vars/all
-        sed -i 's/172\.16\.2\.26/10\.92\.171\.140/g; s/172\.16\.0\.0\/12/10\.92\.171\.0\/24/g' params.blueprint.core.yaml
-        sed -i 's/172\.16\.2\.5/10\.92\.171\.140/g; s/172\.16\.2\.6/10\.92\.171\.229/g' inventories/blueprint/core/hosts
-        ansible-playbook -i inventories/blueprint/core/ k8s-master.yaml --extra-vars "@params.blueprint.core.yaml"
-        ansible-playbook -i inventories/blueprint/core/ k8s-nodes.yaml --extra-vars "@params.blueprint.core.yaml"
-      displayName: Ansible deploy
+      #   # Creating Core cluster
+      #   sed -i 's/root/ubuntu/g' inventories/blueprint/core/group_vars/all
+      #   sed -i 's/172\.16\.2\.26/10\.92\.171\.140/g; s/172\.16\.0\.0\/12/10\.92\.171\.0\/24/g' params.blueprint.core.yaml
+      #   sed -i 's/172\.16\.2\.5/10\.92\.171\.140/g; s/172\.16\.2\.6/10\.92\.171\.229/g' inventories/blueprint/core/hosts
+      #   ansible-playbook -i inventories/blueprint/core/ k8s-master.yaml --extra-vars "@params.blueprint.core.yaml"
+      #   ansible-playbook -i inventories/blueprint/core/ k8s-nodes.yaml --extra-vars "@params.blueprint.core.yaml"
+      # displayName: Ansible deploy
     # - task: DockerInstaller@0
     #   inputs:
     #     dockerVersion: '17.09.0-ce'
