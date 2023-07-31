@@ -29,8 +29,8 @@ stages:
     - task: SSH@0
       inputs:
         sshEndpoint: 'ssh-sop'
-        runOptions: 'inline'
-        inline: 'ssh -A interns@sopnode-z1.inria.fr " touch test"'
+        runOptions: 'commands'
+        commands: 'ssh -A interns@sopnode-z1.inria.fr "touch test"'
         readyTimeout: '20000'
     - script: |
 
