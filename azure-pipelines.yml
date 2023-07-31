@@ -53,6 +53,12 @@ stages:
       #   sed -i 's/172\.16\.2\.5/10\.92\.171\.140/g; s/172\.16\.2\.6/10\.92\.171\.229/g' inventories/blueprint/core/hosts
       #   ansible-playbook -i inventories/blueprint/core/ k8s-master.yaml --extra-vars "@params.blueprint.core.yaml"
       #   ansible-playbook -i inventories/blueprint/core/ k8s-nodes.yaml --extra-vars "@params.blueprint.core.yaml"
+    - task: SSH@0
+      inputs:
+        sshEndpoint: 'ssh-sop'
+        runOptions: 'commands'
+        commands: 'ssh -A interns@sopnode-z1.inria.fr "multipass delete --purge test"'
+        readyTimeout: '20000'
       # displayName: Ansible deploy
     # - task: DockerInstaller@0
     #   inputs:
