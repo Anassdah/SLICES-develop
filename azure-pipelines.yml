@@ -39,7 +39,7 @@ stages:
         sshEndpoint: 'ssh-sop'
         runOptions: 'commands'
         commands: |
-          ssh -A interns@sopnode-z1.inria.fr "test_ip=$(multipass info dn --format json | jq -r '.info.dn.ipv4[0]')"
+          ssh -A interns@sopnode-z1.inria.fr "test_ip=\$(multipass info dn --format json | jq -r '.info.dn.ipv4[0]')"
         readyTimeout: '20000'
 
 
