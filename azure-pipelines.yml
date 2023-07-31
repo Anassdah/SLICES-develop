@@ -26,13 +26,13 @@ stages:
       name: Default
 
     steps:
-    - task: SSH@0
-      inputs:
-        sshEndpoint: 'ssh-sop'
-        runOptions: 'commands'
-        commands: |
-          ssh -A interns@sopnode-z1.inria.fr "multipass launch --name test"
-        readyTimeout: '20000'
+    # - task: SSH@0
+    #   inputs:
+    #     sshEndpoint: 'ssh-sop'
+    #     runOptions: 'commands'
+    #     commands: |
+    #       ssh -A interns@sopnode-z1.inria.fr "multipass launch --name test"
+    #     readyTimeout: '20000'
     
     - task: SSH@0
       inputs:
