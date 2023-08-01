@@ -39,8 +39,8 @@ stages:
         sshEndpoint: 'ssh-sop'
         runOptions: 'commands'
         commands: |
-          papa=$(multipass info dn --format json | jq -r '.info.dn.ipv4[0]')
-          echo "##vso[task.setvariable variable=papa]$papa"
+          papa=\$(multipass info dn --format json | jq -r '.info.dn.ipv4[0]')
+          echo "##vso[task.setvariable variable=papa]\$papa"
         readyTimeout: '20000'
 
 
