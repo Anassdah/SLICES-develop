@@ -39,7 +39,7 @@ stages:
         sshEndpoint: 'ssh-sop'
         runOptions: 'commands'
         commands: |
-          ssh -A interns@sopnode-z1.inria.fr "papa=\$(multipass info dn --format json | jq -r '.info.dn.ipv4[0]') && echo \$papa"$papa" > vm.txt"
+          ssh -A interns@sopnode-z1.inria.fr "papa=\$(multipass info dn --format json | jq -r '.info.dn.ipv4[0]') && echo \$papa"$papa" > vm.txt && echo $(TEST)"
         readyTimeout: '20000'
 
 
