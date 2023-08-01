@@ -56,7 +56,7 @@ stages:
       inputs:
         sshEndpoint: 'sopnode-z1'
         runOptions: 'commands'
-        commands: multipass info dn --format json | jq -r '.info.dn.ipv4[0]')
+        commands: multipass info dn --format json | jq -r '.info.dn.ipv4[0]'
         readyTimeout: '20000'
 
     - script: |
