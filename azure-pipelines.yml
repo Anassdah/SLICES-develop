@@ -56,7 +56,7 @@ stages:
       inputs:
         sshEndpoint: 'sopnode-z1'
         runOptions: 'commands'
-        commands: echo \$(pwd)
+        commands: echo $(pwd)
         readyTimeout: '20000'
 
     - script: |
