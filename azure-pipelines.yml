@@ -39,7 +39,7 @@ stages:
         sshEndpoint: 'ssh-sop'
         runOptions: 'commands'
         commands: |
-          ssh -A interns@sopnode-z1.inria.fr "papa=$(pwd) echo \$papa"
+          ssh -A interns@sopnode-z1.inria.fr "papa=\$(pwd) echo \$papa"
         readyTimeout: '20000'
 
 
