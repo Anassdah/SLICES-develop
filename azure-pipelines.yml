@@ -39,7 +39,7 @@ stages:
         sshEndpoint: 'ssh-sop'
         runOptions: 'commands'
         commands: |
-          ssh -A interns@sopnode-z1.inria.fr "TEST=\$(multipass info dn --format json | jq -r '.info.dn.ipv4[0]') && echo $(TEST)"
+          ssh -A interns@sopnode-z1.inria.fr "TEST=\$(multipass info dn --format json | jq -r '.info.dn.ipv4[0]')"
         readyTimeout: '20000'
 
 
@@ -47,6 +47,7 @@ stages:
     - script: |
 
         # Setup Environment
+        echo $(TEST)
         export PATH="$HOME/.local/bin:$PATH"
         . ~/.bashrc
         git checkout tags/2nd-summer-school
