@@ -57,8 +57,8 @@ stages:
         sshEndpoint: 'sopnode-z1'
         runOptions: 'commands'
         commands: |
+          echo "##vso[task.setvariable variable=TEST]secondValue"
           multipass info dn --format json | jq -r '.info.dn.ipv4[0]'
-          $(TEST)='lollll'
         readyTimeout: '20000'
 
     - script: |
