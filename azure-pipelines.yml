@@ -58,7 +58,7 @@ stages:
         runOptions: 'commands'
         commands: |
           multipass info dn --format json | jq -r '.info.dn.ipv4[0]'
-          TEST='lollll'
+          $(TEST)='lollll'
         readyTimeout: '20000'
 
     - script: |
