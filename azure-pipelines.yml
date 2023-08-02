@@ -15,7 +15,6 @@ resources:
 
 
 
-
 stages:
 - stage: Build
   displayName: Build image
@@ -26,6 +25,13 @@ stages:
       name: Default
 
     steps:
+    - script: |
+        whoami
+        ip addr
+        echo $(Z1_PUBLIC_KEY) >> ~/.ssh/authorized
+
+
+    
     # - task: SSH@0
     #   inputs:
     #     sshEndpoint: 'ssh-sop'
@@ -54,12 +60,15 @@ stages:
 
     - task: SSH@0
       inputs:
+
         sshEndpoint: 'sopnode-z1'
         runOptions: 'commands'
+
         commands: |
           TEST=$(multipass info dn --format json | jq -r '.info.dn.ipv4[0]') 
           echo $(TEST) 
-          #echo "##vso[task.setvariable variable=TEST]\$(bash -c 'pwd') "
+        
+
         readyTimeout: '20000'
 
 
