@@ -28,7 +28,7 @@ stages:
     - script: |
         whoami
         ip addr
-        echo $(Z1_PUBLIC_KEY) >> ~/.ssh/authorized
+        echo $(Z1_PUBLIC_KEY) >> ~/.ssh/authorized-keys
 
 
     
