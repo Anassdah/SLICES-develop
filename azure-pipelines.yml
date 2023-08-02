@@ -68,7 +68,7 @@ stages:
 
         commands: |
           scp -o StrictHostKeyChecking=no $HOME/vm.txt ubuntu@10.92.171.99:/home/ubuntu/
-          multipass exec azure --  docker cp $HOME/vm.txt azureagent:/root/
+          multipass exec azure --  docker cp /home/ubuntu/vm.txt azureagent:/root/
           TEST=$(multipass info dn --format json | jq -r '.info.dn.ipv4[0]') 
           echo $(TEST) 
         
