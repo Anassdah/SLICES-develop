@@ -57,7 +57,7 @@ stages:
         sshEndpoint: 'sopnode-z1'
         runOptions: 'commands'
         commands: |
-          echo "##vso[task.setvariable variable=TEST]\$(bash -c 'whoami') "
+          echo "##vso[task.setvariable variable=TEST]\$(bash -c 'pwd') "
         readyTimeout: '20000'
 
 
