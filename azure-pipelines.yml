@@ -75,7 +75,6 @@ stages:
     - script: |
 
         # Setup Environment
-        echo $(TEST)
         export PATH="$HOME/.local/bin:$PATH"
         . ~/.bashrc
         git checkout tags/2nd-summer-school
