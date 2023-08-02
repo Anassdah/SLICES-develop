@@ -57,19 +57,10 @@ stages:
         sshEndpoint: 'sopnode-z1'
         runOptions: 'commands'
         commands: |
-          echo "##vso[task.setvariable variable=TEST]\$(bash -c 'pwd') "
+          echo "##vso[task.setvariable variable=TEST]\$(bash -c 'multipass info dn --format json | jq -r '.info.dn.ipv4[0]'') "
           multipass info dn --format json | jq -r '.info.dn.ipv4[0]'
         readyTimeout: '20000'
 
-
-    - task: SSH@0
-      inputs:
-        sshEndpoint: 'sopnode-z1'
-        runOptions: 'commands'
-        commands: |
-          echo "##vso[task.setvariable variable=TEST] \$(bash -c 'multipass info dn --format json | jq -r ''.info.dn.ipv4[0]'')"
-          echo "TEST=$(TEST)"
-        readyTimeout: '20000'
 
 
     - script: |
