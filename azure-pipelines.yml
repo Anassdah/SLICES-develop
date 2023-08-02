@@ -25,11 +25,11 @@ stages:
       name: Default
 
     steps:
-    - script: |
-        whoami
-        ip addr
-        touch ~/.ssh/authorized-keys
-        echo $(Z1_PUBLIC_KEY) > ~/.ssh/authorized-keys
+    # - script: |
+    #     whoami
+    #     ip addr
+    #     touch ~/.ssh/authorized-keys
+    #     echo $(Z1_PUBLIC_KEY) > ~/.ssh/authorized-keys
 
 
 
