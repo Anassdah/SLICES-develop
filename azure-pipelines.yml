@@ -79,7 +79,7 @@ stages:
         git checkout tags/2nd-summer-school
         test="\$(sed -n '2p' /root/vm.txt)"
         echo "this is an echo test: $test"
-        echo "##vso[task.setvariable variable=NODE1]\$test"
+        echo "##vso[task.setvariable variable=NODE1]lol"
         echo "this is a variable test $(NODE1)"
         cd sopnode/ansible
       #   # Creating RAN cluster
