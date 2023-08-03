@@ -30,36 +30,7 @@ stages:
     #     ip addr
     #     touch ~/.ssh/authorized-keys
     #     echo $(Z1_PUBLIC_KEY) > ~/.ssh/authorized-keys
-
-
-
-    #  Create VMs
-    - task: SSH@0
-      displayName: 'Launch Multipass VMs'
-      inputs:
-        sshEndpoint: 'sopnode-z1'
-        runOptions: 'commands'
-        commands: |
-          multipass launch --name node1
-          multipass launch --name node2
-        readyTimeout: '20000'
-    # Fetch IP@ of VMs to be used in ansible hosts files
-    - task: SSH@0
-      displayName: 'Fetch IP@ of VMs'
-      inputs:
-        sshEndpoint: 'sopnode-z1'
-        runOptions: 'commands'
-        commands: |
-          multipass info node2 --format json | jq -r '.info.node2.ipv4[0]' > vm.txt
-          multipass info node3 --format json | jq -r '.info.node3.ipv4[0]' >> vm.txt
-          #Send the vm.txt to the azure VM (already exists before the pipeline)
-          scp -o StrictHostKeyChecking=no $HOME/vm.txt ubuntu@10.92.171.99:/home/ubuntu/
-          #Send the vm.txt to the azure agent container
-          multipass exec azure --  docker cp /home/ubuntu/vm.txt azureagent:/root/
-        readyTimeout: '20000'
-    
-
-    # - task: SSH@0
+      # - task: SSH@0
     #   inputs:
     #     sshEndpoint: 'sopnode-z1'
     #     runOptions: 'commands'
@@ -71,21 +42,51 @@ stages:
 
 
 
+    #  Create VMs
+    - task: SSH@0
+      displayName: 'Launch Multipass VMs'
+      inputs:
+        sshEndpoint: 'sopnode-z1'
+        runOptions: 'commands'
+        commands: |
+          multipass launch --cloud-init azurevm-init.yaml --cpus 4 --disk 40G --mem 16G --name leftclient
+          multipass launch --cloud-init azurevm-init.yaml --cpus 4 --disk 40G --mem 16G --name rightclient
+          multipass launch --cloud-init azurevm-init.yaml --cpus 4 --disk 40G --mem 16G --name leftswitch
+        readyTimeout: '20000'
+    # Fetch IP@ of VMs to be used in ansible hosts files
+    - task: SSH@0
+      displayName: 'Fetch IP@ of VMs'
+      inputs:
+        sshEndpoint: 'sopnode-z1'
+        runOptions: 'commands'
+        commands: |
+          multipass info leftclient --format json | jq -r '.info.node2.ipv4[0]' > vm.txt
+          multipass info rightclient --format json | jq -r '.info.node3.ipv4[0]' >> vm.txt
+          multipass info leftswitch --format json | jq -r '.info.node3.ipv4[0]' >> vm.txt
+          #Send the vm.txt to the azure VM (already exists before the pipeline)
+          scp -o StrictHostKeyChecking=no $HOME/vm.txt ubuntu@10.92.171.99:/home/ubuntu/
+          #Send the vm.txt to the azure agent container
+          multipass exec azure --  docker cp /home/ubuntu/vm.txt azureagent:/root/
+        readyTimeout: '20000'
+
+
+
     - script: |
  
         # Setup Environment
         export PATH="$HOME/.local/bin:$PATH"
         . ~/.bashrc
         git checkout tags/2nd-summer-school
-        node1=$(sed -n '1p' /root/vm.txt)
-        node2=$(sed -n '2p' /root/vm.txt)
+        leftclient=$(sed -n '1p' /root/vm.txt)
+        rightclient=$(sed -n '2p' /root/vm.txt)
+        leftswitch=$(sed -n '2p' /root/vm.txt)
         cd sopnode/ansible
-      #   # Creating RAN cluster
-      #   sed -i 's/172\.16\.2\.2/10\.92\.171\.134/g' inventories/blueprint/ran/hosts
-      #   sed -i 's/root/ubuntu/g' inventories/blueprint/ran/group_vars/all
-      #   sed -i 's/172\.16\.2\.27/10\.92\.171\.134/g; s/172\.16\.0\.0\/12/10\.92\.171\.0\/24/g' params.blueprint.ran.yaml 
-      #   ansible-playbook -i inventories/blueprint/ran/ k8s-master.yaml --extra-vars "@params.blueprint.ran.yaml"
-      #   ansible-playbook -i inventories/blueprint/ran/ k8s-node.yaml --extra-vars "@params.blueprint.ran.yaml"
+        # Creating RAN cluster
+        sed -i "s/172\.16\.2\.2/$node1/g" inventories/blueprint/ran/hosts
+        sed -i 's/root/ubuntu/g' inventories/blueprint/ran/group_vars/all
+        sed -i "s/172\.16\.2\.27/10\.92\.171\.134/g; s/172\.16\.0\.0\/12/10\.92\.171\.0\/24/g" params.blueprint.ran.yaml 
+        ansible-playbook -i inventories/blueprint/ran/ k8s-master.yaml --extra-vars "@params.blueprint.ran.yaml"
+        ansible-playbook -i inventories/blueprint/ran/ k8s-node.yaml --extra-vars "@params.blueprint.ran.yaml"
 
 
       #   # Creating Core cluster
