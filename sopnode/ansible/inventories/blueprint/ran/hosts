@@ -1,8 +1,10 @@
 all:
   children:
     computes:
-      localhost:
-        ansible_connection: local
+      hosts:
+        172.16.2.2:
+          xx-name: leftswitch
     masters:
-     localhost:
-        ansible_connection: local
+      hosts:
+        172.16.2.2:
+          xx-name: leftswitch
