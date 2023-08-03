@@ -4,7 +4,7 @@
 # https://docs.microsoft.com/azure/devops/pipelines/languages/docker
 
 trigger:
-- develop
+- main
 
 pool:
  name: Default
@@ -43,16 +43,16 @@ stages:
 
 
     #  Create VMs
-    # - task: SSH@0
-    #   displayName: 'Launch Multipass VMs'
-    #   inputs:
-    #     sshEndpoint: 'sopnode-z1'
-    #     runOptions: 'commands'
-    #     commands: |
-    #       multipass launch --cloud-init azurevm-init.yaml --cpus 4 --disk 40G --mem 16G --name leftclient
-    #       multipass launch --cloud-init azurevm-init.yaml --cpus 4 --disk 40G --mem 16G --name rightclient
-    #       multipass launch --cloud-init azurevm-init.yaml --cpus 4 --disk 40G --mem 16G --name leftswitch
-    #     readyTimeout: '20000'
+    - task: SSH@0
+      displayName: 'Launch Multipass VMs'
+      inputs:
+        sshEndpoint: 'sopnode-z1'
+        runOptions: 'commands'
+        commands: |
+          multipass launch --cloud-init azurevm-init.yaml --cpus 4 --disk 40G --mem 16G --name leftclient
+          multipass launch --cloud-init azurevm-init.yaml --cpus 4 --disk 40G --mem 16G --name rightclient
+          multipass launch --cloud-init azurevm-init.yaml --cpus 4 --disk 40G --mem 16G --name leftswitch
+        readyTimeout: '20000'
     # Fetch IP@ of VMs to be used in ansible hosts files
     - task: SSH@0
       displayName: 'Fetch IP@ of VMs'
@@ -76,7 +76,6 @@ stages:
         # Setup Environment
         export PATH="$HOME/.local/bin:$PATH"
         . ~/.bashrc
-        git checkout tags/2nd-summer-school
         leftclient=$(sed -n '1p' /root/vm.txt)
         rightclient=$(sed -n '2p' /root/vm.txt)
         leftswitch=$(sed -n '3p' /root/vm.txt)
