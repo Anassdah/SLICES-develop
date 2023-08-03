@@ -89,23 +89,24 @@ stages:
         ansible-playbook -i inventories/blueprint/ran/ k8s-node.yaml --extra-vars "@params.blueprint.ran.yaml"
 
 
-      #   # Creating Core cluster
-      #   sed -i 's/root/ubuntu/g' inventories/blueprint/core/group_vars/all
-      #   sed -i 's/172\.16\.2\.26/10\.92\.171\.140/g; s/172\.16\.0\.0\/12/10\.92\.171\.0\/24/g' params.blueprint.core.yaml
-      #   sed -i 's/172\.16\.2\.5/10\.92\.171\.140/g; s/172\.16\.2\.6/10\.92\.171\.229/g' inventories/blueprint/core/hosts
-      #   ansible-playbook -i inventories/blueprint/core/ k8s-master.yaml --extra-vars "@params.blueprint.core.yaml"
-      #   ansible-playbook -i inventories/blueprint/core/ k8s-nodes.yaml --extra-vars "@params.blueprint.core.yaml"
+        # Creating Core cluster
+        sed -i 's/root/ubuntu/g' inventories/blueprint/core/group_vars/all
+        sed -i 's/172\.16\.2\.26/$leftclient/g; s/172\.16\.0\.0\/12/10\.92\.171\.0\/24/g' params.blueprint.core.yaml
+        sed -i 's/172\.16\.2\.5/$leftclient/g; s/172\.16\.2\.6/$rightclient/g' inventories/blueprint/core/hosts
+        ansible-playbook -i inventories/blueprint/core/ k8s-master.yaml --extra-vars "@params.blueprint.core.yaml"
+        ansible-playbook -i inventories/blueprint/core/ k8s-nodes.yaml --extra-vars "@params.blueprint.core.yaml"
       displayName: 'Blueprint Deployment'
 
-    - task: SSH@0
-      inputs:
-        sshEndpoint: 'sopnode-z1'
-        runOptions: 'commands'
-        commands: |
-          multipass delete --purge node1
-          multipass delete --purge node2
-        readyTimeout: '20000'
-      displayName: Destroy VMs
+    # - task: SSH@0
+    #   inputs:
+    #     sshEndpoint: 'sopnode-z1'
+    #     runOptions: 'commands'
+    #     commands: |
+    #       multipass delete --purge leftclient
+    #       multipass delete --purge rightclient
+    #       multipass delete --purge leftswitch
+    #     readyTimeout: '20000'
+    #   displayName: Destroy VMs
     # - task: DockerInstaller@0
     #   inputs:
     #     dockerVersion: '17.09.0-ce'
