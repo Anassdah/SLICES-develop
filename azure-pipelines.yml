@@ -80,6 +80,7 @@ stages:
         leftclient=$(sed -n '1p' /root/vm.txt)
         rightclient=$(sed -n '2p' /root/vm.txt)
         leftswitch=$(sed -n '3p' /root/vm.txt)
+        echo $leftswitch
         cd sopnode/ansible
         # Creating RAN cluster
         sed -i "s/172\.16\.2\.2/$leftswitch/g" inventories/blueprint/ran/hosts
