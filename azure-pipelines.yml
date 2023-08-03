@@ -33,56 +33,51 @@ stages:
 
 
 
-    
-    # - task: SSH@0
-    #   inputs:
-    #     sshEndpoint: 'ssh-sop'
-    #     runOptions: 'commands'
-    #     commands: |
-    #       ssh -A interns@sopnode-z1.inria.fr "multipass launch --name test"
-    #     readyTimeout: '20000'
-    
-    # - task: SSH@0
-    #   inputs:
-    #     sshEndpoint: 'ssh-sop'
-    #     runOptions: 'commands'
-    #     commands: |
-    #       ssh -A interns@sopnode-z1.inria.fr "TEST=\$(multipass info dn --format json | jq -r '.info.dn.ipv4[0]')"
-    #     readyTimeout: '20000'
-
-
-    # - task: SSH@0
-    #   inputs:
-    #     sshEndpoint: 'ssh-sop'
-    #     runOptions: 'commands'
-    #     commands: |
-    #       ssh -A interns@sopnode-z1.inria.fr "echo '##vso[task.setvariable variable=FOO] \$(multipass info dn --format json | jq -r '.info.dn.ipv4[0]')'"
-    #     readyTimeout: '20000'
-
-
+    #  Create VMs
     - task: SSH@0
+      displayName: 'Launch Multipass VMs'
       inputs:
-
         sshEndpoint: 'sopnode-z1'
         runOptions: 'commands'
-
         commands: |
-          scp -o StrictHostKeyChecking=no $HOME/vm.txt ubuntu@10.92.171.99:/home/ubuntu/
-          multipass exec azure --  docker cp /home/ubuntu/vm.txt azureagent:/root/
-          TEST=$(multipass info dn --format json | jq -r '.info.dn.ipv4[0]') 
-          echo $(TEST) 
-        
-
+          multipass launch --name node1
+          multipass launch --name node2
         readyTimeout: '20000'
+    # Fetch IP@ of VMs to be used in ansible hosts files
+    - task: SSH@0
+      displayName: 'Fetch IP@ of VMs'
+      inputs:
+        sshEndpoint: 'sopnode-z1'
+        runOptions: 'commands'
+        commands: |
+          multipass info node2 --format json | jq -r '.info.node2.ipv4[0]' > vm.txt
+          multipass info node3 --format json | jq -r '.info.node3.ipv4[0]' >> vm.txt
+          #Send the vm.txt to the azure VM (already exists before the pipeline)
+          scp -o StrictHostKeyChecking=no $HOME/vm.txt ubuntu@10.92.171.99:/home/ubuntu/
+          #Send the vm.txt to the azure agent container
+          multipass exec azure --  docker cp /home/ubuntu/vm.txt azureagent:/root/
+        readyTimeout: '20000'
+    
+
+    # - task: SSH@0
+    #   inputs:
+    #     sshEndpoint: 'sopnode-z1'
+    #     runOptions: 'commands'
+    #     commands: |
+    #       echo '##vso[task.setvariable variable=FOO] \$(multipass info dn --format json | jq -r '.info.dn.ipv4[0]')'
+    #     readyTimeout: '20000'
+
+
 
 
 
     - script: |
-        echo $(TEST)    
+ 
         # Setup Environment
         export PATH="$HOME/.local/bin:$PATH"
         . ~/.bashrc
         git checkout tags/2nd-summer-school
+        sed -n '2p' /root/vm.txt
         cd sopnode/ansible
       #   # Creating RAN cluster
       #   sed -i 's/172\.16\.2\.2/10\.92\.171\.134/g' inventories/blueprint/ran/hosts
@@ -98,13 +93,15 @@ stages:
       #   sed -i 's/172\.16\.2\.5/10\.92\.171\.140/g; s/172\.16\.2\.6/10\.92\.171\.229/g' inventories/blueprint/core/hosts
       #   ansible-playbook -i inventories/blueprint/core/ k8s-master.yaml --extra-vars "@params.blueprint.core.yaml"
       #   ansible-playbook -i inventories/blueprint/core/ k8s-nodes.yaml --extra-vars "@params.blueprint.core.yaml"
-    # - task: SSH@0
-    #   inputs:
-    #     sshEndpoint: 'ssh-sop'
-    #     runOptions: 'commands'
-    #     commands: 'ssh -A interns@sopnode-z1.inria.fr "multipass delete --purge test"'
-    #     readyTimeout: '20000'
-      # displayName: Ansible deploy
+    - task: SSH@0
+      inputs:
+        sshEndpoint: 'sopnode-z1'
+        runOptions: 'commands'
+        commands: |
+          multipass delete --purge node1
+          multipass delete --purge node2
+        readyTimeout: '20000'
+      displayName: Destroy VMs
     # - task: DockerInstaller@0
     #   inputs:
     #     dockerVersion: '17.09.0-ce'
