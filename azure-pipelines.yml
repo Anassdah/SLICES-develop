@@ -80,7 +80,13 @@ stages:
         test=$(sed -n '2p' /root/vm.txt)
         echo "this is an echo test: $test"
         NODE1="lol"
-        echo "##vso[task.setvariable variable=NODE1]$NODE1"
+        FOO="some value"
+        echo "##vso[task.setvariable variable=FOO;isOutput=true]$FOO
+        echo $(FOO)
+        FOO="other value"
+        echo "##vso[task.setvariable variable=FOO;isOutput=true]$FOO
+        echo $(FOO)
+        echo "##vso[task.setvariable variable=NODE1] \$test"
         echo "this is a variable test $(NODE1)"
         cd sopnode/ansible
       #   # Creating RAN cluster
