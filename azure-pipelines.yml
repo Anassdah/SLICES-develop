@@ -79,7 +79,8 @@ stages:
         git checkout tags/2nd-summer-school
         test=$(sed -n '2p' /root/vm.txt)
         echo "this is an echo test: $test"
-        NODE1="lol"
+        NODE1=$test
+        echo $(NODE1)
         FOO="some value"
         echo "##vso[task.setvariable variable=FOO;isOutput=true]$FOO
         echo $(FOO)
