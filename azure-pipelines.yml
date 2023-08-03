@@ -43,16 +43,16 @@ stages:
 
 
     #  Create VMs
-    - task: SSH@0
-      displayName: 'Launch Multipass VMs'
-      inputs:
-        sshEndpoint: 'sopnode-z1'
-        runOptions: 'commands'
-        commands: |
-          multipass launch --cloud-init azurevm-init.yaml --cpus 4 --disk 40G --mem 16G --name leftclient
-          multipass launch --cloud-init azurevm-init.yaml --cpus 4 --disk 40G --mem 16G --name rightclient
-          multipass launch --cloud-init azurevm-init.yaml --cpus 4 --disk 40G --mem 16G --name leftswitch
-        readyTimeout: '20000'
+    # - task: SSH@0
+    #   displayName: 'Launch Multipass VMs'
+    #   inputs:
+    #     sshEndpoint: 'sopnode-z1'
+    #     runOptions: 'commands'
+    #     commands: |
+    #       multipass launch --cloud-init azurevm-init.yaml --cpus 4 --disk 40G --mem 16G --name leftclient
+    #       multipass launch --cloud-init azurevm-init.yaml --cpus 4 --disk 40G --mem 16G --name rightclient
+    #       multipass launch --cloud-init azurevm-init.yaml --cpus 4 --disk 40G --mem 16G --name leftswitch
+    #     readyTimeout: '20000'
     # Fetch IP@ of VMs to be used in ansible hosts files
     - task: SSH@0
       displayName: 'Fetch IP@ of VMs'
@@ -79,7 +79,6 @@ stages:
         leftclient=$(sed -n '1p' /root/vm.txt)
         rightclient=$(sed -n '2p' /root/vm.txt)
         leftswitch=$(sed -n '3p' /root/vm.txt)
-        echo $leftswitch
         cd sopnode/ansible
         # Creating RAN cluster
         sed -i "s/172\.16\.2\.2/$leftswitch/g" inventories/blueprint/ran/hosts
@@ -92,10 +91,11 @@ stages:
 
         # Creating Core cluster
         sed -i 's/root/ubuntu/g' inventories/blueprint/core/group_vars/all
-        sed -i 's/172\.16\.2\.26/$leftclient/g; s/172\.16\.0\.0\/12/10\.92\.171\.0\/24/g' params.blueprint.core.yaml
-        sed -i 's/172\.16\.2\.5/$leftclient/g; s/172\.16\.2\.6/$rightclient/g' inventories/blueprint/core/hosts
+        sed -i "s/172\.16\.2\.26/$leftclient/g; s/172\.16\.0\.0\/12/10\.92\.171\.0\/24/g" params.blueprint.core.yaml
+        sed -i "s/172\.16\.2\.5/$leftclient/g; s/172\.16\.2\.6/$rightclient/g" inventories/blueprint/core/hosts
+        cat inventories/blueprint/core/hosts
         ansible-playbook -i inventories/blueprint/core/ k8s-master.yaml --extra-vars "@params.blueprint.core.yaml"
-        ansible-playbook -i inventories/blueprint/core/ k8s-nodes.yaml --extra-vars "@params.blueprint.core.yaml"
+        ansible-playbook -i inventories/blueprint/core/ k8s-node.yaml --extra-vars "@params.blueprint.core.yaml"
       displayName: 'Blueprint Deployment'
 
     # - task: SSH@0
