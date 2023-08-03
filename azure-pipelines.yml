@@ -77,9 +77,10 @@ stages:
         export PATH="$HOME/.local/bin:$PATH"
         . ~/.bashrc
         git checkout tags/2nd-summer-school
-        echo "##vso[task.setvariable variable=NODE1]sed -n '2p' /root/vm.txt"
-        sed -n '2p' /root/vm.txt
-        echo "$(NODE1)"
+        test=\$(sed -n '2p' /root/vm.txt)
+        echo "this is an echo test: $test"
+        echo "##vso[task.setvariable variable=NODE1]\$test"
+        echo "this is a variable test $(NODE1)"
         cd sopnode/ansible
       #   # Creating RAN cluster
       #   sed -i 's/172\.16\.2\.2/10\.92\.171\.134/g' inventories/blueprint/ran/hosts
