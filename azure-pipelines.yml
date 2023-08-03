@@ -5,6 +5,12 @@
 
 trigger:
 - main
+# schedules:
+# - cron: '0 0 * * *'
+#   displayName: Daily midnight build
+#   branches:
+#     include:
+#     - main
 
 pool:
  name: Default
@@ -96,6 +102,9 @@ stages:
         cat inventories/blueprint/core/hosts
         ansible-playbook -i inventories/blueprint/core/ k8s-master.yaml --extra-vars "@params.blueprint.core.yaml"
         ansible-playbook -i inventories/blueprint/core/ k8s-node.yaml --extra-vars "@params.blueprint.core.yaml"
+        #5g core
+        echo 'Deploying 5g core'
+        
       displayName: 'Blueprint Deployment'
 
     # - task: SSH@0
