@@ -94,6 +94,8 @@ stages:
       #   sed -i 's/172\.16\.2\.5/10\.92\.171\.140/g; s/172\.16\.2\.6/10\.92\.171\.229/g' inventories/blueprint/core/hosts
       #   ansible-playbook -i inventories/blueprint/core/ k8s-master.yaml --extra-vars "@params.blueprint.core.yaml"
       #   ansible-playbook -i inventories/blueprint/core/ k8s-nodes.yaml --extra-vars "@params.blueprint.core.yaml"
+      displayName: 'Blueprint Deployment'
+
     - task: SSH@0
       inputs:
         sshEndpoint: 'sopnode-z1'
@@ -102,7 +104,7 @@ stages:
           multipass delete --purge node1
           multipass delete --purge node2
         readyTimeout: '20000'
-    #   displayName: Destroy VMs
+      displayName: Destroy VMs
     # - task: DockerInstaller@0
     #   inputs:
     #     dockerVersion: '17.09.0-ce'
