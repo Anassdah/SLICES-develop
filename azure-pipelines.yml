@@ -60,9 +60,9 @@ stages:
         sshEndpoint: 'sopnode-z1'
         runOptions: 'commands'
         commands: |
-          multipass info leftclient --format json | jq -r '.info.node2.ipv4[0]' > vm.txt
-          multipass info rightclient --format json | jq -r '.info.node3.ipv4[0]' >> vm.txt
-          multipass info leftswitch --format json | jq -r '.info.node3.ipv4[0]' >> vm.txt
+          multipass info leftclient --format json | jq -r '.info.leftclient.ipv4[0]' > vm.txt
+          multipass info rightclient --format json | jq -r '.info.rightclient.ipv4[0]' >> vm.txt
+          multipass info leftswitch --format json | jq -r '.info.leftswitch.ipv4[0]' >> vm.txt
           #Send the vm.txt to the azure VM (already exists before the pipeline)
           scp -o StrictHostKeyChecking=no $HOME/vm.txt ubuntu@10.92.171.99:/home/ubuntu/
           #Send the vm.txt to the azure agent container
