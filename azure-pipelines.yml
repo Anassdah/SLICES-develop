@@ -4,7 +4,7 @@
 # https://docs.microsoft.com/azure/devops/pipelines/languages/docker
 
 trigger:
-- main
+- develop
 # schedules:
 # - cron: '0 0 * * *'
 #   displayName: Daily midnight build
@@ -22,8 +22,8 @@ resources:
 
 
 stages:
-- stage: Build
-  displayName: Build image
+- stage: Blueprint Ubuntu deployment
+  displayName: Blueprint Deployment
   jobs:
   - job: Build
     displayName: Ubuntu 22.04 Deployment
@@ -82,11 +82,12 @@ stages:
         # Setup Environment
         export PATH="$HOME/.local/bin:$PATH"
         . ~/.bashrc
+        echo 'Setting IP@ variables ...'
         leftclient=$(sed -n '1p' /root/vm.txt)
         rightclient=$(sed -n '2p' /root/vm.txt)
         leftswitch=$(sed -n '3p' /root/vm.txt)
         cd sopnode/ansible
-        # Creating RAN cluster
+        # Creating RAN cluster; update ran host file
         sed -i "s/172\.16\.2\.2/$leftswitch/g" inventories/blueprint/ran/hosts
         sed -i 's/root/ubuntu/g' inventories/blueprint/ran/group_vars/all
         sed -i "s/172\.16\.2\.27/$leftswitch/g; s/172\.16\.0\.0\/12/10\.92\.171\.0\/24/g" params.blueprint.ran.yaml 
@@ -96,7 +97,7 @@ stages:
         ansible-playbook -i inventories/blueprint/ran/ k8s-node.yaml --extra-vars "@params.blueprint.ran.yaml"
 
 
-        # Creating 5G core cluster
+        # Creating 5G core cluster; update core host file
         sed -i 's/root/ubuntu/g' inventories/blueprint/core/group_vars/all
         sed -i "s/172\.16\.2\.26/$leftclient/g; s/172\.16\.0\.0\/12/10\.92\.171\.0\/24/g" params.blueprint.core.yaml
         sed -i "s/172\.16\.2\.5/$leftclient/g; s/172\.16\.2\.6/$rightclient/g" inventories/blueprint/core/hosts
@@ -106,12 +107,9 @@ stages:
         ansible-playbook -i inventories/blueprint/core/ k8s-node.yaml --extra-vars "@params.blueprint.core.yaml"
         #Cluster interconection
         echo 'Cluster interconnection ...'
+        echo 'Set up openvpn server ...'
         sed -i "s/192\.0\.2\.1/$leftclient/g" roles/openvpn/vars/main.yaml
         ansible-playbook  -i inventories/blueprint/core/ openvpn.yaml --extra-vars "@params.blueprint.core.yaml"
-  
-        #Ran deployment
-        #echo 'deploying 5G ran ...'
-        #ansible-playbook  -i inventories/blueprint/ran/  5g.yaml  --extra-vars "@params.blueprint.ran.yaml"
       displayName: 'K8S Clusters Setup'
   
     - task: SSH@0
@@ -179,16 +177,16 @@ stages:
            multipass exec leftswitch -- ping -c 1 -I 10.0.10.1 172.22.10.1
         readyTimeout: '20000'
 
-    # - task: SSH@0
-    #   inputs:
-    #     sshEndpoint: 'sopnode-z1'
-    #     runOptions: 'commands'
-    #     commands: |
-    #       multipass delete --purge leftclient
-    #       multipass delete --purge rightclient
-    #       multipass delete --purge leftswitch
-    #     readyTimeout: '20000'
-    #   displayName: Destroy VMs
+    - task: SSH@0
+      inputs:
+        sshEndpoint: 'sopnode-z1'
+        runOptions: 'commands'
+        commands: |
+          multipass delete --purge leftclient
+          multipass delete --purge rightclient
+          multipass delete --purge leftswitch
+        readyTimeout: '20000'
+      displayName: Destroy VMs
     # - task: DockerInstaller@0
     #   inputs:
     #     dockerVersion: '17.09.0-ce'
