@@ -114,15 +114,15 @@ stages:
         #ansible-playbook  -i inventories/blueprint/ran/  5g.yaml  --extra-vars "@params.blueprint.ran.yaml"
       displayName: 'K8S Clusters Setup'
   
-    - task: SSH@0
-      displayName: 'Setup ran0 interface'
-      inputs:
-        sshEndpoint: 'sopnode-z1'
-        runOptions: 'commands'
-        commands: |
-          multipass exec leftswitch -- /bin/bash -c 'sudo ip link add ran0 type veth peer name ran0_0 && sudo ip link set up ran0 && sudo ip link set up ran0_0 && sudo ip addr add 10.0.10.1/24 dev ran0_0'
-          multipass exec rightclient -- /bin/bash -c 'sudo ip link add ran0 type veth peer name ran0_0 && sudo ip link set up ran0 && sudo ip link set up ran0_0 && sudo ip addr add 172.22.10.1/24 dev ran0_0'
-        readyTimeout: '20000'
+    # - task: SSH@0
+    #   displayName: 'Setup ran0 interface'
+    #   inputs:
+    #     sshEndpoint: 'sopnode-z1'
+    #     runOptions: 'commands'
+    #     commands: |
+    #       multipass exec leftswitch -- /bin/bash -c 'sudo ip link add ran0 type veth peer name ran0_0 && sudo ip link set up ran0 && sudo ip link set up ran0_0 && sudo ip addr add 10.0.10.1/24 dev ran0_0'
+    #       multipass exec rightclient -- /bin/bash -c 'sudo ip link add ran0 type veth peer name ran0_0 && sudo ip link set up ran0 && sudo ip link set up ran0_0 && sudo ip addr add 172.22.10.1/24 dev ran0_0'
+    #     readyTimeout: '20000'
 
     - task: SSH@0
       displayName: 'Set  OpenVPN client in core'
