@@ -111,7 +111,7 @@ stages:
   
         #Ran deployment
         echo 'deploying 5G ran ...'
-        ansible-playbook  -i inventories/blueprint/ran/  5g.yaml  --extra-vars "@params.blueprint.ran.yaml"
+        #ansible-playbook  -i inventories/blueprint/ran/  5g.yaml  --extra-vars "@params.blueprint.ran.yaml"
       displayName: 'K8S Clusters Setup'
   
     - task: SSH@0
