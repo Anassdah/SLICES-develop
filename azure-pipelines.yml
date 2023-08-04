@@ -132,7 +132,7 @@ stages:
         commands: |
            multipass transfer leftclient:/home/ubuntu/core/core.ovpn . 
            multipass transfer core.ovpn rightclient:/home/ubuntu/
-           multipass exec rightclient -- sudo openvpn core.ovpn
+           multipass exec rightclient -- sudo openvpn core.ovpn &
         readyTimeout: '20000'
 
     - task: SSH@0
@@ -143,7 +143,7 @@ stages:
         commands: |
            multipass transfer leftclient:/home/ubuntu/ran/ran.ovpn . 
            multipass transfer ran.ovpn leftswitch:/home/ubuntu/
-           multipass exec leftswitch -- sudo openvpn core.ovpn
+           multipass exec leftswitch -- sudo openvpn core.ovpn &
         readyTimeout: '20000'
     - task: SSH@0
       displayName: 'Connection test'
