@@ -74,9 +74,17 @@ stages:
           #Send the vm.txt to the azure agent container
           multipass exec azure --  docker cp /home/ubuntu/vm.txt azureagent:/root/
         readyTimeout: '20000'
-
-
-
+        
+    # - task: SSH@0
+    #   displayName: 'Setup ran0 interface'
+    #   inputs:
+    #     sshEndpoint: 'sopnode-z1'
+    #     runOptions: 'commands'
+    #     commands: |
+    #       multipass exec leftswitch -- /bin/bash -c 'ip link add ran0 type veth peer name ran0_0 && ip link set up ran0 && ip link set up ran0_0 && ip addr add 10.0.10.1/24 dev ran0_0'
+    #       multipass exec rightclient -- /bin/bash -c 'ip link add ran0 type veth peer name ran0_0 && ip link set up ran0 && ip link set up ran0_0 && ip addr add 172.22.10.1/24 dev ran0_0'
+    #     readyTimeout: '20000'
+  
     - script: |
  
         # Setup Environment
@@ -87,23 +95,26 @@ stages:
         leftswitch=$(sed -n '3p' /root/vm.txt)
         cd sopnode/ansible
         # Creating RAN cluster
-        sed -i "s/172\.16\.2\.2/$leftswitch/g" inventories/blueprint/ran/hosts
-        cat inventories/blueprint/ran/hosts
-        sed -i 's/root/ubuntu/g' inventories/blueprint/ran/group_vars/all
-        sed -i "s/172\.16\.2\.27/$leftswitch/g; s/172\.16\.0\.0\/12/10\.92\.171\.0\/24/g" params.blueprint.ran.yaml 
-        ansible-playbook -i inventories/blueprint/ran/ k8s-master.yaml --extra-vars "@params.blueprint.ran.yaml"
-        ansible-playbook -i inventories/blueprint/ran/ k8s-node.yaml --extra-vars "@params.blueprint.ran.yaml"
+        # sed -i "s/172\.16\.2\.2/$leftswitch/g" inventories/blueprint/ran/hosts
+        # cat inventories/blueprint/ran/hosts
+        # sed -i 's/root/ubuntu/g' inventories/blueprint/ran/group_vars/all
+        # sed -i "s/172\.16\.2\.27/$leftswitch/g; s/172\.16\.0\.0\/12/10\.92\.171\.0\/24/g" params.blueprint.ran.yaml 
+        # ansible-playbook -i inventories/blueprint/ran/ k8s-master.yaml --extra-vars "@params.blueprint.ran.yaml"
+        # ansible-playbook -i inventories/blueprint/ran/ k8s-node.yaml --extra-vars "@params.blueprint.ran.yaml"
 
 
-        # Creating Core cluster
-        sed -i 's/root/ubuntu/g' inventories/blueprint/core/group_vars/all
-        sed -i "s/172\.16\.2\.26/$leftclient/g; s/172\.16\.0\.0\/12/10\.92\.171\.0\/24/g" params.blueprint.core.yaml
-        sed -i "s/172\.16\.2\.5/$leftclient/g; s/172\.16\.2\.6/$rightclient/g" inventories/blueprint/core/hosts
-        cat inventories/blueprint/core/hosts
-        ansible-playbook -i inventories/blueprint/core/ k8s-master.yaml --extra-vars "@params.blueprint.core.yaml"
-        ansible-playbook -i inventories/blueprint/core/ k8s-node.yaml --extra-vars "@params.blueprint.core.yaml"
-        #5g core
-        echo 'Deploying 5g core'
+        # # Creating Core cluster
+        # sed -i 's/root/ubuntu/g' inventories/blueprint/core/group_vars/all
+        # sed -i "s/172\.16\.2\.26/$leftclient/g; s/172\.16\.0\.0\/12/10\.92\.171\.0\/24/g" params.blueprint.core.yaml
+        # sed -i "s/172\.16\.2\.5/$leftclient/g; s/172\.16\.2\.6/$rightclient/g" inventories/blueprint/core/hosts
+        # cat inventories/blueprint/core/hosts
+        # ansible-playbook -i inventories/blueprint/core/ k8s-master.yaml --extra-vars "@params.blueprint.core.yaml"
+        # ansible-playbook -i inventories/blueprint/core/ k8s-node.yaml --extra-vars "@params.blueprint.core.yaml"
+        #Cluster interconection
+        echo 'Cluster interconnection ....'
+        sed -i "s/192\.0\.2\.1/$leftclient/g" roles/openvpn/vars/main.yaml
+        ansible-playbook  -i inventories/blueprint/core/ openvpn.yaml --extra-vars "@params.blueprint.core.yaml"
+
         
       displayName: 'Blueprint Deployment'
 
