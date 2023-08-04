@@ -107,7 +107,7 @@ stages:
         #Cluster interconection
         echo 'Cluster interconnection ...'
         sed -i "s/192\.0\.2\.1/$leftclient/g" roles/openvpn/vars/main.yaml
-        #ansible-playbook  -i inventories/blueprint/core/ openvpn.yaml --extra-vars "@params.blueprint.core.yaml"
+        ansible-playbook  -i inventories/blueprint/core/ openvpn.yaml --extra-vars "@params.blueprint.core.yaml"
   
         #Ran deployment
         echo 'deploying 5G ran ...'
