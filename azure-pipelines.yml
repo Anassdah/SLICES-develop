@@ -26,7 +26,7 @@ stages:
   displayName: Build image
   jobs:
   - job: Build
-    displayName: Build
+    displayName: Ubuntu 22.04 Deployment
     pool:
       name: Default
 
@@ -49,16 +49,16 @@ stages:
 
 
     #  Create VMs
-    # - task: SSH@0
-    #   displayName: 'Launch Multipass VMs'
-    #   inputs:
-    #     sshEndpoint: 'sopnode-z1'
-    #     runOptions: 'commands'
-    #     commands: |
-    #       multipass launch --cloud-init azurevm-init.yaml --cpus 4 --disk 40G --mem 16G --name leftclient
-    #       multipass launch --cloud-init azurevm-init.yaml --cpus 4 --disk 40G --mem 16G --name rightclient
-    #       multipass launch --cloud-init azurevm-init.yaml --cpus 4 --disk 40G --mem 16G --name leftswitch
-    #     readyTimeout: '20000'
+    - task: SSH@0
+      displayName: 'Launch Multipass VMs'
+      inputs:
+        sshEndpoint: 'sopnode-z1'
+        runOptions: 'commands'
+        commands: |
+          multipass launch --cloud-init azurevm-init.yaml --cpus 4 --disk 40G --mem 16G --name leftclient
+          multipass launch --cloud-init azurevm-init.yaml --cpus 4 --disk 40G --mem 16G --name rightclient
+          multipass launch --cloud-init azurevm-init.yaml --cpus 4 --disk 40G --mem 16G --name leftswitch
+        readyTimeout: '20000'
     # Fetch IP@ of VMs to be used in ansible hosts files
     - task: SSH@0
       displayName: 'Fetch IP@ of VMs'
@@ -75,15 +75,7 @@ stages:
           multipass exec azure --  docker cp /home/ubuntu/vm.txt azureagent:/root/
         readyTimeout: '20000'
         
-    # - task: SSH@0
-    #   displayName: 'Setup ran0 interface'
-    #   inputs:
-    #     sshEndpoint: 'sopnode-z1'
-    #     runOptions: 'commands'
-    #     commands: |
-    #       multipass exec leftswitch -- /bin/bash -c 'ip link add ran0 type veth peer name ran0_0 && ip link set up ran0 && ip link set up ran0_0 && ip addr add 10.0.10.1/24 dev ran0_0'
-    #       multipass exec rightclient -- /bin/bash -c 'ip link add ran0 type veth peer name ran0_0 && ip link set up ran0 && ip link set up ran0_0 && ip addr add 172.22.10.1/24 dev ran0_0'
-    #     readyTimeout: '20000'
+
   
     - script: |
  
@@ -96,34 +88,90 @@ stages:
         cd sopnode/ansible
         # Creating RAN cluster
         sed -i "s/172\.16\.2\.2/$leftswitch/g" inventories/blueprint/ran/hosts
-        cat inventories/blueprint/ran/hosts
         sed -i 's/root/ubuntu/g' inventories/blueprint/ran/group_vars/all
         sed -i "s/172\.16\.2\.27/$leftswitch/g; s/172\.16\.0\.0\/12/10\.92\.171\.0\/24/g" params.blueprint.ran.yaml 
-        # ansible-playbook -i inventories/blueprint/ran/ k8s-master.yaml --extra-vars "@params.blueprint.ran.yaml"
-        # ansible-playbook -i inventories/blueprint/ran/ k8s-node.yaml --extra-vars "@params.blueprint.ran.yaml"
+        cat inventories/blueprint/ran/hosts
+        echo 'Creating RAN cluster ...'
+        ansible-playbook -i inventories/blueprint/ran/ k8s-master.yaml --extra-vars "@params.blueprint.ran.yaml"
+        ansible-playbook -i inventories/blueprint/ran/ k8s-node.yaml --extra-vars "@params.blueprint.ran.yaml"
 
 
-        # # Creating Core cluster
+        # Creating 5G core cluster
         sed -i 's/root/ubuntu/g' inventories/blueprint/core/group_vars/all
         sed -i "s/172\.16\.2\.26/$leftclient/g; s/172\.16\.0\.0\/12/10\.92\.171\.0\/24/g" params.blueprint.core.yaml
         sed -i "s/172\.16\.2\.5/$leftclient/g; s/172\.16\.2\.6/$rightclient/g" inventories/blueprint/core/hosts
         cat inventories/blueprint/core/hosts
-        # ansible-playbook -i inventories/blueprint/core/ k8s-master.yaml --extra-vars "@params.blueprint.core.yaml"
-        # ansible-playbook -i inventories/blueprint/core/ k8s-node.yaml --extra-vars "@params.blueprint.core.yaml"
+        echo 'Creating core cluster ...'
+        ansible-playbook -i inventories/blueprint/core/ k8s-master.yaml --extra-vars "@params.blueprint.core.yaml"
+        ansible-playbook -i inventories/blueprint/core/ k8s-node.yaml --extra-vars "@params.blueprint.core.yaml"
         #Cluster interconection
-        echo 'Cluster interconnection ....'
+        echo 'Cluster interconnection ...'
         sed -i "s/192\.0\.2\.1/$leftclient/g" roles/openvpn/vars/main.yaml
         #ansible-playbook  -i inventories/blueprint/core/ openvpn.yaml --extra-vars "@params.blueprint.core.yaml"
-        #Core deployment
-        echo 'deploying 5G core ...'
-        ansible-playbook  -i inventories/blueprint/core/  5g.yaml  --extra-vars "@params.blueprint.core.yaml"
+  
         #Ran deployment
         echo 'deploying 5G ran ...'
         ansible-playbook  -i inventories/blueprint/ran/  5g.yaml  --extra-vars "@params.blueprint.ran.yaml"
+      displayName: 'K8S Clusters Setup'
+  
+    - task: SSH@0
+      displayName: 'Setup ran0 interface'
+      inputs:
+        sshEndpoint: 'sopnode-z1'
+        runOptions: 'commands'
+        commands: |
+          multipass exec leftswitch -- /bin/bash -c 'sudo ip link add ran0 type veth peer name ran0_0 && sudo ip link set up ran0 && sudo ip link set up ran0_0 && sudo ip addr add 10.0.10.1/24 dev ran0_0'
+          multipass exec rightclient -- /bin/bash -c 'sudo ip link add ran0 type veth peer name ran0_0 && sudo ip link set up ran0 && sudo ip link set up ran0_0 && sudo ip addr add 172.22.10.1/24 dev ran0_0'
+        readyTimeout: '20000'
 
+    - task: SSH@0
+      displayName: 'Set  OpenVPN client in core'
+      inputs:
+        sshEndpoint: 'sopnode-z1'
+        runOptions: 'commands'
+        commands: |
+           multipass transfer leftclient:/home/ubuntu/core/core.ovpn . 
+           multipass transfer core.ovpn rightclient:/home/ubuntu/
+           multipass exec rightclient -- sudo openvpn core.ovpn
+        readyTimeout: '20000'
 
-        
-      displayName: 'Blueprint Deployment'
+    - task: SSH@0
+      displayName: 'Set  OpenVPN client in RAN'
+      inputs:
+        sshEndpoint: 'sopnode-z1'
+        runOptions: 'commands'
+        commands: |
+           multipass transfer leftclient:/home/ubuntu/ran/ran.ovpn . 
+           multipass transfer ran.ovpn leftswitch:/home/ubuntu/
+           multipass exec leftswitch -- sudo openvpn core.ovpn
+        readyTimeout: '20000'
+    - task: SSH@0
+      displayName: 'Connection test'
+      inputs:
+        sshEndpoint: 'sopnode-z1'
+        runOptions: 'commands'
+        commands: |
+           multipass exec leftswitch -- ping -c 1 -I 10.0.10.1 172.22.10.1
+        readyTimeout: '20000'
+    - script: |
+ 
+        #Setup Environment
+        export PATH="$HOME/.local/bin:$PATH"
+        . ~/.bashrc
+        cd sopnode/ansible
+        #Core deployment
+        echo 'deploying 5G core ...'
+        ansible-playbook  -i inventories/blueprint/core/  5g.yaml  --extra-vars "@params.blueprint.core.yaml"
+
+      displayName: '5G core deployment'
+    - script: |
+ 
+        # Setup Environment
+        export PATH="$HOME/.local/bin:$PATH"
+        . ~/.bashrc
+        cd sopnode/ansible
+        ansible-playbook  -i inventories/blueprint/ran/  5g.yaml  --extra-vars "@params.blueprint.ran.yaml"
+      displayName: 'RAN deployment'
 
     # - task: SSH@0
     #   inputs:
