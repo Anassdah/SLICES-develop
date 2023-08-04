@@ -49,16 +49,16 @@ stages:
 
 
     #  Create VMs
-    # - task: SSH@0
-    #   displayName: 'Launch Multipass VMs'
-    #   inputs:
-    #     sshEndpoint: 'sopnode-z1'
-    #     runOptions: 'commands'
-    #     commands: |
-    #       multipass launch --cloud-init azurevm-init.yaml --cpus 4 --disk 40G --mem 16G --name leftclient
-    #       multipass launch --cloud-init azurevm-init.yaml --cpus 4 --disk 40G --mem 16G --name rightclient
-    #       multipass launch --cloud-init azurevm-init.yaml --cpus 4 --disk 40G --mem 16G --name leftswitch
-    #     readyTimeout: '20000'
+    - task: SSH@0
+      displayName: 'Launch Multipass VMs'
+      inputs:
+        sshEndpoint: 'sopnode-z1'
+        runOptions: 'commands'
+        commands: |
+          multipass launch --cloud-init azurevm-init.yaml --cpus 4 --disk 40G --mem 16G --name leftclient
+          multipass launch --cloud-init azurevm-init.yaml --cpus 4 --disk 40G --mem 16G --name rightclient
+          multipass launch --cloud-init azurevm-init.yaml --cpus 4 --disk 40G --mem 16G --name leftswitch
+        readyTimeout: '20000'
     # Fetch IP@ of VMs to be used in ansible hosts files
     - task: SSH@0
       displayName: 'Fetch IP@ of VMs'
@@ -110,41 +110,44 @@ stages:
         ansible-playbook  -i inventories/blueprint/core/ openvpn.yaml --extra-vars "@params.blueprint.core.yaml"
   
         #Ran deployment
-        echo 'deploying 5G ran ...'
+        #echo 'deploying 5G ran ...'
         #ansible-playbook  -i inventories/blueprint/ran/  5g.yaml  --extra-vars "@params.blueprint.ran.yaml"
       displayName: 'K8S Clusters Setup'
   
-    # - task: SSH@0
-    #   displayName: 'Setup ran0 interface'
-    #   inputs:
-    #     sshEndpoint: 'sopnode-z1'
-    #     runOptions: 'commands'
-    #     commands: |
-    #       multipass exec leftswitch -- /bin/bash -c 'sudo ip link add ran0 type veth peer name ran0_0 && sudo ip link set up ran0 && sudo ip link set up ran0_0 && sudo ip addr add 10.0.10.1/24 dev ran0_0'
-    #       multipass exec rightclient -- /bin/bash -c 'sudo ip link add ran0 type veth peer name ran0_0 && sudo ip link set up ran0 && sudo ip link set up ran0_0 && sudo ip addr add 172.22.10.1/24 dev ran0_0'
-    #     readyTimeout: '20000'
+    - task: SSH@0
+      displayName: 'Setup ran0 interface'
+      continueOnError: true
+      inputs:
+        sshEndpoint: 'sopnode-z1'
+        runOptions: 'commands'
+        commands: |
+          multipass exec leftswitch -- /bin/bash -c 'sudo ip link add ran0 type veth peer name ran0_0 && sudo ip link set up ran0 && sudo ip link set up ran0_0 && sudo ip addr add 10.0.10.1/24 dev ran0_0'
+          multipass exec rightclient -- /bin/bash -c 'sudo ip link add ran0 type veth peer name ran0_0 && sudo ip link set up ran0 && sudo ip link set up ran0_0 && sudo ip addr add 172.22.10.1/24 dev ran0_0'
+        readyTimeout: '20000'
 
     - task: SSH@0
       displayName: 'Set  OpenVPN client in core'
+      continueOnError: true
       inputs:
         sshEndpoint: 'sopnode-z1'
         runOptions: 'commands'
         commands: |
            multipass transfer leftclient:/home/ubuntu/core/core.ovpn . 
            multipass transfer core.ovpn rightclient:/home/ubuntu/
-           multipass exec rightclient -- sudo openvpn core.ovpn &
-        readyTimeout: '20000'
+           multipass exec rightclient -- multipass exec leftswitch -- nohup sudo openvpn ran.ovpn </dev/null >nohup.log 2>&1 &
+        readyTimeout: '2000'
 
     - task: SSH@0
       displayName: 'Set  OpenVPN client in RAN'
+      continueOnError: true
       inputs:
         sshEndpoint: 'sopnode-z1'
         runOptions: 'commands'
         commands: |
            multipass transfer leftclient:/home/ubuntu/ran/ran.ovpn . 
            multipass transfer ran.ovpn leftswitch:/home/ubuntu/
-           multipass exec leftswitch -- sudo openvpn core.ovpn &
-        readyTimeout: '20000'
+           multipass exec leftswitch -- nohup sudo openvpn ran.ovpn </dev/null >nohup.log 2>&1 &
+        readyTimeout: '2000'
     - task: SSH@0
       displayName: 'Connection test'
       inputs:
@@ -170,7 +173,7 @@ stages:
         export PATH="$HOME/.local/bin:$PATH"
         . ~/.bashrc
         cd sopnode/ansible
-        ansible-playbook  -i inventories/blueprint/ran/  5g.yaml  --extra-vars "@params.blueprint.ran.yaml"
+        ansible-playbook  -i inventories/blueprint/ran/  5g.yaml  --extra-vars "@params.5g.ran.yaml"
       displayName: 'RAN deployment'
 
     # - task: SSH@0
