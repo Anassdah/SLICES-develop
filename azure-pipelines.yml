@@ -22,8 +22,8 @@ resources:
 
 
 stages:
-- stage: Blueprint Ubuntu deployment
-  displayName: Blueprint Deployment
+- stage: blueprint ubuntu deployment
+  displayName: blueprint Deployment
   jobs:
   - job: Build
     displayName: Ubuntu 22.04 Deployment
