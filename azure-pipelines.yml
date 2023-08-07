@@ -138,7 +138,7 @@ stages:
         parallel --halt now,fail=1 ::: "$playbook1" "$playbook2"
         EOF
         chmod +x run_node_playbooks.sh
-        ./run__node_playbooks.sh
+        ./run_node_playbooks.sh
 
         #Cluster interconection
         echo 'Cluster interconnection ...'
