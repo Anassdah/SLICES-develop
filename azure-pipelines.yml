@@ -98,7 +98,7 @@ stages:
         sed -i 's/root/ubuntu/g' inventories/blueprint/ran/group_vars/all
         sed -i "s/172\.16\.2\.27/$leftswitch/g; s/172\.16\.0\.0\/12/10\.92\.171\.0\/24/g" params.blueprint.ran.yaml 
         cat inventories/blueprint/ran/hosts
-        echo 'Creating RAN cluster ...'
+        #echo 'Creating RAN cluster ...'
         #ansible-playbook -i inventories/blueprint/ran/ k8s-master.yaml --extra-vars "@params.blueprint.ran.yaml"
         #ansible-playbook -i inventories/blueprint/ran/ k8s-node.yaml --extra-vars "@params.blueprint.ran.yaml"
 
@@ -108,30 +108,44 @@ stages:
         sed -i "s/172\.16\.2\.26/$leftclient/g; s/172\.16\.0\.0\/12/10\.92\.171\.0\/24/g" params.blueprint.core.yaml
         sed -i "s/172\.16\.2\.5/$leftclient/g; s/172\.16\.2\.6/$rightclient/g" inventories/blueprint/core/hosts
         cat inventories/blueprint/core/hosts
-        echo 'Creating core cluster ...'
+        #echo 'Creating core cluster ...'
         #ansible-playbook -i inventories/blueprint/core/ k8s-master.yaml --extra-vars "@params.blueprint.core.yaml"
         #ansible-playbook -i inventories/blueprint/core/ k8s-node.yaml --extra-vars "@params.blueprint.core.yaml"
 
         #trying parallel execution
-        ansible-playbook -i inventories/blueprint/core/ k8s-master.yaml --extra-vars "@params.blueprint.core.yaml" &
-        ansible-playbook -i inventories/blueprint/ran/ k8s-master.yaml --extra-vars "@params.blueprint.ran.yaml" &
-        wait
-        ansible-playbook -i inventories/blueprint/ran/ k8s-node.yaml --extra-vars "@params.blueprint.ran.yaml" &
-        ansible-playbook -i inventories/blueprint/core/ k8s-node.yaml --extra-vars "@params.blueprint.core.yaml"
+        echo 'Creating RAN & core cluster ...'
+        # ansible-playbook -i inventories/blueprint/core/ k8s-master.yaml --extra-vars "@params.blueprint.core.yaml" &
+        # ansible-playbook -i inventories/blueprint/ran/ k8s-master.yaml --extra-vars "@params.blueprint.ran.yaml" &
+        # wait
+        # ansible-playbook -i inventories/blueprint/ran/ k8s-node.yaml --extra-vars "@params.blueprint.ran.yaml" &
+        # ansible-playbook -i inventories/blueprint/core/ k8s-node.yaml --extra-vars "@params.blueprint.core.yaml"
+        cat <<'EOF' > run_master_playbooks.sh
+        #!/bin/bash
+
+        playbook1="ansible-playbook -i inventories/blueprint/ran/ k8s-master.yaml --extra-vars '@params.blueprint.ran.yaml'"
+        playbook2="ansible-playbook -i inventories/blueprint/core/ k8s-master.yaml --extra-vars '@params.blueprint.core.yaml'"
+
+        parallel --halt now,fail=1 ::: "$playbook1" "$playbook2"
+        EOF
+        chmod +x run_master_playbooks.sh
+        ./run_playbooks.sh
+        cat <<'EOF' > run_node_playbooks.sh
+        #!/bin/bash
+
+        playbook1="ansible-playbook -i inventories/blueprint/ran/ k8s-master.yaml --extra-vars '@params.blueprint.ran.yaml'"
+        playbook2="ansible-playbook -i inventories/blueprint/core/ k8s-master.yaml --extra-vars '@params.blueprint.core.yaml'"
+
+        parallel --halt now,fail=1 ::: "$playbook1" "$playbook2"
+        EOF
+        chmod +x run_node_playbooks.sh
+        ./run__node_playbooks.sh
+
         #Cluster interconection
         echo 'Cluster interconnection ...'
         echo 'Set up openvpn server ...'
         sed -i "s/192\.0\.2\.1/$leftclient/g" roles/openvpn/vars/main.yaml
         ansible-playbook  -i inventories/blueprint/core/ openvpn.yaml --extra-vars "@params.blueprint.core.yaml"
-        cat <<'EOF' > run_playbooks.sh
-        #!/bin/bash
-
-        playbook1="path/to/playbook1.yml"
-        playbook2="path/to/playbook2.yml"
-
-        parallel --halt now,fail=1 ::: "ansible-playbook $playbook1" "ansible-playbook $playbook2"
-        EOF
-
+        
       displayName: 'K8S Clusters Setup'
   
     - task: SSH@0
