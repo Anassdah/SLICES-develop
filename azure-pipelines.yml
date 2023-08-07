@@ -22,7 +22,7 @@ resources:
 
 
 stages:
-- stage: blueprint ubuntu deployment
+- stage: Blueprint_Ubuntu_Deployment
   displayName: blueprint Deployment
   jobs:
   - job: Build
