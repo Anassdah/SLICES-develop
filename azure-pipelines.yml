@@ -128,12 +128,12 @@ stages:
         parallel --halt now,fail=1 ::: "$playbook1" "$playbook2"
         EOF
         chmod +x run_master_playbooks.sh
-        ./run_playbooks.sh
+        ./run_master_playbooks.sh
         cat <<'EOF' > run_node_playbooks.sh
         #!/bin/bash
 
-        playbook1="ansible-playbook -i inventories/blueprint/ran/ k8s-master.yaml --extra-vars '@params.blueprint.ran.yaml'"
-        playbook2="ansible-playbook -i inventories/blueprint/core/ k8s-master.yaml --extra-vars '@params.blueprint.core.yaml'"
+        playbook1="ansible-playbook -i inventories/blueprint/ran/ k8s-node.yaml --extra-vars '@params.blueprint.ran.yaml'"
+        playbook2="ansible-playbook -i inventories/blueprint/core/ k8s-node.yaml --extra-vars '@params.blueprint.core.yaml'"
 
         parallel --halt now,fail=1 ::: "$playbook1" "$playbook2"
         EOF
