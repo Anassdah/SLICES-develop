@@ -120,11 +120,11 @@ stages:
         wait
         echo 'Creating nodes ...'
         ansible-playbook -i inventories/blueprint/ran/ k8s-node.yaml --extra-vars "@params.blueprint.ran.yaml" &
-        ansible-playbook -i inventories/blueprint/core/ k8s-node.yaml --extra-vars "@params.blueprint.core.yaml" &
+        ansible-playbook -i inventories/blueprint/core/ k8s-node.yaml --extra-vars "@params.blueprint.core.yaml" 
         echo 'Cluster interconnection ...'
         #Cluster interconection
         #Set up openvpn server 34.154.187.186
-        sed -i "s/34\.154\.187\.186/$node1/g" roles/openvpn/vars/main.yaml &
+        sed -i "s/34\.154\.187\.186/$node1/g" roles/openvpn/vars/main.yaml 
         cat roles/openvpn/vars/main.yaml
         ansible-playbook  -i inventories/blueprint/core/ openvpn.yaml --extra-vars "@params.blueprint.core.yaml"
         
