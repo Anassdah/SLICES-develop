@@ -5,6 +5,7 @@
 
 trigger:
 - develop
+## Use this for scheduled runs
 # schedules:
 # - cron: '0 0 * * *'
 #   displayName: Daily midnight build
@@ -31,9 +32,10 @@ stages:
       name: Default
 
     steps:
+
+
     # - script: |
     #     whoami
-    #     ip addr
     #     touch ~/.ssh/authorized-keys
     #     echo $(Z1_PUBLIC_KEY) > ~/.ssh/authorized-keys
       # - task: SSH@0
@@ -69,6 +71,7 @@ stages:
           multipass info leftclient --format json | jq -r '.info.leftclient.ipv4[0]' > vm.txt
           multipass info rightclient --format json | jq -r '.info.rightclient.ipv4[0]' >> vm.txt
           multipass info leftswitch --format json | jq -r '.info.leftswitch.ipv4[0]' >> vm.txt
+
           #Send the vm.txt to the azure VM (already exists before the pipeline)
           scp -o StrictHostKeyChecking=no $HOME/vm.txt ubuntu@10.92.171.99:/home/ubuntu/
           #Send the vm.txt to the azure agent container
@@ -85,65 +88,42 @@ stages:
         export PATH="$HOME/.local/bin:$PATH"
         . ~/.bashrc
         echo 'Setting IP@ variables ...'
+        
+        #Set variables 
         leftclient=$(sed -n '1p' /root/vm.txt)
         rightclient=$(sed -n '2p' /root/vm.txt)
         leftswitch=$(sed -n '3p' /root/vm.txt)
         cd sopnode/ansible
 
-        
-
-
-        # Creating RAN cluster; update ran host file
+        # Update ansbile RAN hosts
         sed -i "s/172\.16\.2\.2/$leftswitch/g" inventories/blueprint/ran/hosts
         sed -i 's/root/ubuntu/g' inventories/blueprint/ran/group_vars/all
         sed -i "s/172\.16\.2\.27/$leftswitch/g; s/172\.16\.0\.0\/12/10\.92\.171\.0\/24/g" params.blueprint.ran.yaml 
         cat inventories/blueprint/ran/hosts
-        #echo 'Creating RAN cluster ...'
         #ansible-playbook -i inventories/blueprint/ran/ k8s-master.yaml --extra-vars "@params.blueprint.ran.yaml"
         #ansible-playbook -i inventories/blueprint/ran/ k8s-node.yaml --extra-vars "@params.blueprint.ran.yaml"
 
 
-        # Creating 5G core cluster; update core host file
+        # Update ansible core hosts
         sed -i 's/root/ubuntu/g' inventories/blueprint/core/group_vars/all
         sed -i "s/172\.16\.2\.26/$leftclient/g; s/172\.16\.0\.0\/12/10\.92\.171\.0\/24/g" params.blueprint.core.yaml
         sed -i "s/172\.16\.2\.5/$leftclient/g; s/172\.16\.2\.6/$rightclient/g" inventories/blueprint/core/hosts
         cat inventories/blueprint/core/hosts
-        #echo 'Creating core cluster ...'
         #ansible-playbook -i inventories/blueprint/core/ k8s-master.yaml --extra-vars "@params.blueprint.core.yaml"
         #ansible-playbook -i inventories/blueprint/core/ k8s-node.yaml --extra-vars "@params.blueprint.core.yaml"
 
-        #trying parallel execution
+        #Create clusters
         echo 'Creating RAN & core cluster ...'
-        # ansible-playbook -i inventories/blueprint/core/ k8s-master.yaml --extra-vars "@params.blueprint.core.yaml" &
-        # ansible-playbook -i inventories/blueprint/ran/ k8s-master.yaml --extra-vars "@params.blueprint.ran.yaml" &
-        # wait
-        # ansible-playbook -i inventories/blueprint/ran/ k8s-node.yaml --extra-vars "@params.blueprint.ran.yaml" &
-        # ansible-playbook -i inventories/blueprint/core/ k8s-node.yaml --extra-vars "@params.blueprint.core.yaml"
-        cat <<'EOF' > run_master_playbooks.sh
-        #!/bin/bash
-
-        playbook1="ansible-playbook -i inventories/blueprint/ran/ k8s-master.yaml --extra-vars '@params.blueprint.ran.yaml'"
-        playbook2="ansible-playbook -i inventories/blueprint/core/ k8s-master.yaml --extra-vars '@params.blueprint.core.yaml'"
-
-        parallel --halt now,fail=1 ::: "$playbook1" "$playbook2"
-        EOF
-        chmod +x run_master_playbooks.sh
-        ./run_master_playbooks.sh
-        cat <<'EOF' > run_node_playbooks.sh
-        #!/bin/bash
-
-        playbook1="ansible-playbook -i inventories/blueprint/ran/ k8s-node.yaml --extra-vars '@params.blueprint.ran.yaml'"
-        playbook2="ansible-playbook -i inventories/blueprint/core/ k8s-node.yaml --extra-vars '@params.blueprint.core.yaml'"
-
-        parallel --halt now,fail=1 ::: "$playbook1" "$playbook2"
-        EOF
-        chmod +x run_node_playbooks.sh
-        ./run_node_playbooks.sh
-
-        #Cluster interconection
+        ansible-playbook -i inventories/blueprint/core/ k8s-master.yaml --extra-vars "@params.blueprint.core.yaml" &
+        ansible-playbook -i inventories/blueprint/ran/ k8s-master.yaml --extra-vars "@params.blueprint.ran.yaml" &
+        wait
+        echo 'Creating nodes ...'
+        ansible-playbook -i inventories/blueprint/ran/ k8s-node.yaml --extra-vars "@params.blueprint.ran.yaml" &
+        ansible-playbook -i inventories/blueprint/core/ k8s-node.yaml --extra-vars "@params.blueprint.core.yaml" &
         echo 'Cluster interconnection ...'
-        echo 'Set up openvpn server ...'
-        sed -i "s/192\.0\.2\.1/$leftclient/g" roles/openvpn/vars/main.yaml
+        #Cluster interconection
+        #Set up openvpn server
+        sed -i "s/192\.0\.2\.1/$leftclient/g" roles/openvpn/vars/main.yaml &
         ansible-playbook  -i inventories/blueprint/core/ openvpn.yaml --extra-vars "@params.blueprint.core.yaml"
         
       displayName: 'K8S Clusters Setup'
@@ -223,6 +203,23 @@ stages:
           multipass delete --purge leftswitch
         readyTimeout: '20000'
       displayName: Destroy VMs
+    
+
+
+
+      ## You can use this for parallel execution
+      # cat <<'EOF' > run_master_playbooks.sh
+      # #!/bin/bash
+
+      # playbook1="ansible-playbook -i inventories/blueprint/ran/ k8s-master.yaml --extra-vars '@params.blueprint.ran.yaml'"
+      # playbook2="ansible-playbook -i inventories/blueprint/core/ k8s-master.yaml --extra-vars '@params.blueprint.core.yaml'"
+
+      # parallel --halt now,fail=1 ::: "$playbook1" "$playbook2"
+      # EOF
+      # chmod +x run_master_playbooks.sh
+      # ./run_master_playbooks.sh
+
+    ##Use this for docker builds  
     # - task: DockerInstaller@0
     #   inputs:
     #     dockerVersion: '17.09.0-ce'
@@ -234,15 +231,4 @@ stages:
     #     repository: 'anassdahchour/blueprint'
     #     command: 'buildAndPush'
     #     Dockerfile: 'sopnode/ansible/Dockerfile'
-    # - script: | 
 
-    #           # git checkout tags/2nd-summer-school
-    #           cd sopnode/ansible
-    #   displayName: check dependencies
-    # - script: |
-    #           python3 -m pip -V
-    #           echo $PATH
-
-    #           ansible --version
-    #           #ansible-playbook  -i inventories/blueprint/ k8s-master.yaml --extra-vars "@params.blueprint.yaml"
-    #   displayName: Ansible
