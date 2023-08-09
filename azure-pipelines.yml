@@ -27,8 +27,15 @@ stages:
   - job: BuildAndTest
     strategy:
       matrix:
-        os: [ 'ubuntu-latest','windows-latest', 'macOS-latest' ]
-        architecture: [ 'x64', 'arm64' ]
+        ubuntu:
+          os: 'ubuntu-latest'
+          architecture: 'x64'
+        windows:
+          os: 'windows-latest'
+          architecture: 'x64'
+        macOS:
+          os: 'macOS-latest'
+          architecture: 'x64'
     steps:
     - script: echo Building and testing on $(os) $(architecture)
       displayName: 'Build and Test'
