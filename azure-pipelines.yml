@@ -117,7 +117,6 @@ stages:
         ansible-playbook -i inventories/blueprint/core/ k8s-master.yaml --extra-vars "@params.blueprint.core.yaml" &
         ansible-playbook -i inventories/blueprint/ran/ k8s-master.yaml --extra-vars "@params.blueprint.ran.yaml" &
         wait
-        echo 'Creating nodes ...'
         ansible-playbook -i inventories/blueprint/ran/ k8s-node.yaml --extra-vars "@params.blueprint.ran.yaml" &
         ansible-playbook -i inventories/blueprint/core/ k8s-node.yaml --extra-vars "@params.blueprint.core.yaml" 
         echo 'Cluster interconnection ...'
@@ -193,16 +192,16 @@ stages:
            multipass exec leftswitch -- ping -c 1 -I 10.0.10.1 172.22.10.1
         readyTimeout: '20000'
 
-    - task: SSH@0
-      inputs:
-        sshEndpoint: 'sopnode-z1'
-        runOptions: 'commands'
-        commands: |
-          multipass delete --purge leftclient
-          multipass delete --purge rightclient
-          multipass delete --purge leftswitch
-        readyTimeout: '20000'
-      displayName: Destroy VMs
+    # - task: SSH@0
+    #   inputs:
+    #     sshEndpoint: 'sopnode-z1'
+    #     runOptions: 'commands'
+    #     commands: |
+    #       multipass delete --purge leftclient
+    #       multipass delete --purge rightclient
+    #       multipass delete --purge leftswitch
+    #     readyTimeout: '20000'
+    #   displayName: Destroy VMs
     
 
 
