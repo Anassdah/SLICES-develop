@@ -27,10 +27,10 @@ stages:
   - job: BuildAndTest
     strategy:
       matrix:
-        ubuntu:
+        Ubuntu 20.04:
           os: 'ubuntu-latest'
           architecture: 'x64'
-        windows:
+        windows 11:
           os: 'windows-latest'
           architecture: 'x64'
         macOS:
@@ -38,7 +38,7 @@ stages:
           architecture: 'x64'
     steps:
     - script: echo Building and testing on $(os) $(architecture)
-      displayName: 'Build and Test'
+      displayName: 'Build and Test Deployment'
   - job: Build
     displayName: Ubuntu 22.04 Deployment
     pool:
