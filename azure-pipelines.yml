@@ -12,31 +12,23 @@ trigger:
 #     - main
 
 pool:
-  name: 'Default'
-
-strategy:
-  matrix:
-    os: [ 'ubuntu-latest', 'windows-latest', 'macOS-latest' ]
-    architecture: [ 'x64', 'arm64' ]
-
-
-
-
+ name: Default
+ #name: Azure Pipelines
  
 resources:
 - repo: self
 
 
 
-
-
-
 stages:
 - stage: Blueprint_Ubuntu_Deployment
   displayName: blueprint Deployment
-  
   jobs:
   - job: BuildAndTest
+    strategy:
+      matrix:
+        os: [ 'ubuntu-latest','windows-latest', 'macOS-latest' ]
+        architecture: [ 'x64', 'arm64' ]
     steps:
     - script: echo Building and testing on $(os) $(architecture)
       displayName: 'Build and Test'
@@ -46,6 +38,7 @@ stages:
       name: Default
 
     steps:
+
 
 
     # - script: |
