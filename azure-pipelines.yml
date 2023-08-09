@@ -138,7 +138,8 @@ stages:
         runOptions: 'commands'
         commands: |
           multipass exec leftswitch -- /bin/bash -c 'sudo ip link add ran0 type veth peer name ran0_0 && sudo ip link set up ran0 && sudo ip link set up ran0_0 && sudo ip addr add 10.0.10.1/24 dev ran0_0'
-          multipass exec node1 -- /bin/bash -c 'sudo ip link add ran0 type veth peer name ran0_0 && sudo ip link set up ran0 && sudo ip link set up ran0_0 && sudo ip addr add 172.22.10.1/24 dev ran0_0'
+          multipass exec node2 -- /bin/bash -c 'sudo ip link add ran0 type veth peer name ran0_0 && sudo ip link set up ran0 && sudo ip link set up ran0_0 && sudo ip addr add 172.22.10.1/24 dev ran0_0'
+          multipass exec node3 -- /bin/bash -c 'sudo ip link add ran0 type veth peer name ran0_0 && sudo ip link set up ran0 && sudo ip link set up ran0_0 && sudo ip addr add 172.22.10.1/24 dev ran0_0'
         readyTimeout: '20000'
 
     - task: SSH@0
@@ -148,9 +149,9 @@ stages:
         sshEndpoint: 'sopnode-z1'
         runOptions: 'commands'
         commands: |
-           multipass transfer node1:/home/ubuntu/client1/client1.ovpn . 
-           multipass transfer core.ovpn node2:/home/ubuntu/
-           multipass exec node2 -- nohup sudo openvpn client1.ovpn </dev/null >nohup.log 2>&1 &
+           multipass transfer node1:/home/ubuntu/client2/client2.ovpn . 
+           multipass transfer client2.ovpn node2:/home/ubuntu/
+           multipass exec node2 -- nohup sudo openvpn client2.ovpn </dev/null >nohup.log 2>&1 &
         readyTimeout: '2000'
 
     - task: SSH@0
@@ -160,9 +161,9 @@ stages:
         sshEndpoint: 'sopnode-z1'
         runOptions: 'commands'
         commands: |
-           multipass transfer node1:/home/ubuntu/client2/client2.ovpn . 
-           multipass transfer client2.ovpn leftswitch:/home/ubuntu/
-           multipass exec leftswitch -- nohup sudo openvpn client2.ovpn </dev/null >nohup.log 2>&1 &
+           multipass transfer node1:/home/ubuntu/client1/client1.ovpn . 
+           multipass transfer client1.ovpn leftswitch:/home/ubuntu/
+           multipass exec leftswitch -- nohup sudo openvpn client1.ovpn </dev/null >nohup.log 2>&1 &
         readyTimeout: '2000'
 
     - script: |
@@ -182,7 +183,7 @@ stages:
         export PATH="$HOME/.local/bin:$PATH"
         . ~/.bashrc
         cd sopnode/ansible
-        ansible-playbook  -i inventories/blueprint/ran/  5g.yaml  --extra-vars "@params.5g.ran.yaml"
+        ansible-playbook  -i inventories/blueprint/ran/  5g.yaml  --extra-vars "@params.blueprint.ran.yaml"
       displayName: 'RAN deployment'
       continueOnError: true
     - task: SSH@0
