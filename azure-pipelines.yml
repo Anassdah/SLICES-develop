@@ -3,8 +3,8 @@
 # Build a Docker image
 # https://docs.microsoft.com/azure/devops/pipelines/languages/docker
 
-trigger:
-- develop
+# trigger:
+# - develop
 ## Use this for scheduled runs
 # schedules:
 # - cron: '0 0 * * *'
