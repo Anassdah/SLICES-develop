@@ -13,7 +13,7 @@ trigger:
 
 pool:
  name: Default
- demands: Z1
+ agent: z1
  #name: Azure Pipelines
  
 resources:
